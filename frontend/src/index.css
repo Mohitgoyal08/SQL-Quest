@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-display: "Lilita One", "Fredoka", sans-serif;
+  --font-sans: "Nunito", "Quicksand", sans-serif;
+  --font-mono: "Fira Code", "JetBrains Mono", monospace;
+
+  /* SQL Quest Theme */
+
+  --color-parchment-light: #FFF8EA;
+  --color-parchment: #F3E5C8;
+  --color-parchment-dark: #D6C29D;
+
+  --color-ocean-deep: #0B2B40;
+  --color-ocean: #1A5C83;
+  --color-ocean-shallow: #3DA5D9;
+
+  --color-gold: #FFC837;
+  --color-gold-shimmer: #FFF099;
+  --color-gold-dark: #CBA135;
+
+  --color-pirate-crimson: #C83E3E;
+  --color-pirate-leather: #6E473B;
+  --color-pirate-charcoal: #2C3539;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-ocean-deep);
+}
