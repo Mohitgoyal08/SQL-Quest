@@ -6,6 +6,17 @@ export const XP_ATTEMPT_RULES = {
   FOURTH: 0.7,
 };
 
-// Animated Background Constants
-export const BG_SUN_ROTATION_DURATION = 120;
-export const BG_PARTICLE_COUNT = 14;
+// Atmospheric Elements & Durations (in seconds)
+export const ATMOSPHERE_COUNTS = {
+  PARTICLES: 16,
+};
+
+export const ANIMATION_DURATIONS = {
+  SUN_ROTATION: 160,
+  CLOUD_BASE: 65,
+  PARTICLE_BASE: 4,
+  WAVE_BACK: 9,
+  WAVE_FRONT: 6.5,
+  SHIP_BOB: 3.5,
+  FLAG_FLAP: 1.2,
+};
