@@ -23,6 +23,10 @@ export interface SQLChallenge {
   difficulty: 'Novice' | 'Intermediate' | 'Advanced';
   validation: ChallengeValidation;
   starterCode: string;
+
+  // Canonical executable SQL used by the SQLite engine
+  referenceQuery: string;
+
   hints: string[];
   rewards: ChallengeRewards;
   nextChallengeId: string | null;
@@ -43,13 +47,19 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       expected: "SELECT * FROM employees"
     },
     starterCode: "SELECT ",
+    referenceQuery: "SELECT * FROM employees;",
     hints: [
       "Use the asterisk (*) symbol to select all columns.",
       "Don't forget the FROM clause specifying the 'employees' table."
     ],
-    rewards: { xp: 100, coins: 25, item: "Beginner's Compass" },
+    rewards: {
+      xp: 100,
+      coins: 25,
+      item: "Beginner's Compass"
+    },
     nextChallengeId: "chal_02"
   },
+
   {
     id: "chal_02",
     title: "Roll Call",
@@ -65,13 +75,19 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       requiredKeywords: ["select", "name", "from", "employees"]
     },
     starterCode: "SELECT * FROM employees;",
+    referenceQuery: "SELECT name FROM employees;",
     hints: [
       "Replace the wildcard asterisk (*) with the specific column name 'name'.",
       "Ensure the table name remains 'employees'."
     ],
-    rewards: { xp: 125, coins: 30, gems: 5 },
+    rewards: {
+      xp: 125,
+      coins: 30,
+      gems: 5
+    },
     nextChallengeId: "chal_03"
   },
+
   {
     id: "chal_03",
     title: "High Earners",
@@ -86,13 +102,19 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       expected: "WHERE salary > 50000"
     },
     starterCode: "SELECT * FROM employees\nWHERE ",
+    referenceQuery: "SELECT * FROM employees WHERE salary > 50000;",
     hints: [
       "Use the WHERE clause to filter rows.",
       "The comparison operator for greater than is '>'. Check against 50000 without commas."
     ],
-    rewards: { xp: 150, coins: 45, badge: "Coin Counter" },
+    rewards: {
+      xp: 150,
+      coins: 45,
+      badge: "Coin Counter"
+    },
     nextChallengeId: "chal_04"
   },
+
   {
     id: "chal_04",
     title: "Rank by Wealth",
@@ -107,13 +129,19 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       expected: "SELECT * FROM employees ORDER BY salary DESC"
     },
     starterCode: "SELECT * FROM employees\nORDER BY ",
+    referenceQuery: "SELECT * FROM employees ORDER BY salary DESC;",
     hints: [
       "Use ORDER BY followed by the column name 'salary'.",
       "Append DESC at the end of your clause to sort in descending order."
     ],
-    rewards: { xp: 175, coins: 55, gems: 10 },
+    rewards: {
+      xp: 175,
+      coins: 55,
+      gems: 10
+    },
     nextChallengeId: "chal_05"
   },
+
   {
     id: "chal_05",
     title: "The Elite Vanguard",
@@ -128,11 +156,18 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       expected: "^select\\s+\\*\\s+from\\s+employees\\s+order\\s+by\\s+salary\\s+desc\\s+limit\\s+5$"
     },
     starterCode: "SELECT * FROM employees\nORDER BY salary DESC\nLIMIT ",
+    referenceQuery: "SELECT * FROM employees ORDER BY salary DESC LIMIT 5;",
     hints: [
       "Combine ORDER BY salary DESC with the LIMIT keyword.",
       "Provide the number 5 right after LIMIT."
     ],
-    rewards: { xp: 250, coins: 100, gems: 25, badge: "Fleet Master", item: "Spyglass of Truth" },
+    rewards: {
+      xp: 250,
+      coins: 100,
+      gems: 25,
+      badge: "Fleet Master",
+      item: "Spyglass of Truth"
+    },
     nextChallengeId: null
   }
 ];

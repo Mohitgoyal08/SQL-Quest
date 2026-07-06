@@ -1,0 +1,122 @@
+import React, { useState, useCallback } from 'react';
+import { GAME_STATES } from '../config/gameStates';
+import { QuestManager } from './QuestManager';
+import { WorldManager } from './WorldManager';
+import { PlayerProfileService } from '../services/PlayerProfileService';
+import RewardPopup from '../components/mission/RewardPopup';
+
+import LandingPage from '../pages/LandingPage';
+import CharacterSelectionPage from '../pages/CharacterSelectionPage';
+import DialogueScene from '../components/dialogue/DialogueScene';
+import MissionScene from '../components/mission/MissionScene';
+import { ChallengeSidebar } from '../components/challenge/ChallengeSidebar';
+import { ChallengePanel } from '../components/challenge/ChallengePanel';
+//import MissionRewardPanel from '../components/mission/RewardPopup';
+
+export default function GameStateManager({ 
+  progress, 
+  completeChallenge, 
+  selectChallenge, 
+  worldState, 
+  onProfileChange 
+}) {
+  const [gameState, setGameState] = useState(GAME_STATES.LANDING);
+  const [lastEarnedRewards, setLastEarnedRewards] = useState(null);
+
+  const currentChallenge = QuestManager.getActiveChallenge(progress.currentChallengeId);
+  const isChallengeCompleted = progress.completedIds.includes(currentChallenge.id);
+
+  const handleLandingStart = useCallback(() => {
+    setGameState(GAME_STATES.CHARACTER_SELECTION);
+  }, []);
+
+  const handleCharacterCreated = useCallback((profile) => {
+    PlayerProfileService.saveProfile(profile);
+    if (typeof onProfileChange === 'function') {
+      onProfileChange(profile);
+    }
+    setGameState(GAME_STATES.DIALOGUE);
+  }, [onProfileChange]);
+
+  const handleDialogueComplete = useCallback(() => {
+    setGameState(GAME_STATES.MISSION);
+  }, []);
+
+  const handleMissionAccepted = useCallback(() => {
+    setGameState(GAME_STATES.CHALLENGE);
+  }, []);
+
+  const handleMissionDeclined = useCallback(() => {
+    setGameState(GAME_STATES.DIALOGUE);
+  }, []);
+
+  const handleChallengeSuccess = useCallback((challengeId, rewards, nextId) => {
+    completeChallenge(challengeId, rewards, nextId);
+    setLastEarnedRewards(rewards);
+    setGameState(GAME_STATES.REWARD);
+  }, [completeChallenge]);
+
+  const handleRewardClaimed = useCallback(() => {
+    setGameState(GAME_STATES.DIALOGUE);
+  }, []);
+
+  return (
+    <div className="flex-1 flex flex-col relative overflow-hidden">
+      {/* FIXED: Render LandingPage instead of LandingTransition */}
+      {gameState === GAME_STATES.LANDING && (
+        <LandingPage onStart={handleLandingStart} />
+      )}
+
+      {gameState === GAME_STATES.CHARACTER_SELECTION && (
+        <CharacterSelectionPage onComplete={handleCharacterCreated} />
+      )}
+
+      {gameState === GAME_STATES.DIALOGUE && (
+        <DialogueScene
+          dialogue={QuestManager.getDialogueForNPC(worldState.currentNPC, progress.currentChallengeId)}
+          onComplete={handleDialogueComplete}
+        />
+      )}
+
+      {gameState === GAME_STATES.MISSION && (
+        <MissionScene
+          mission={QuestManager.getMissionForChallenge(progress.currentChallengeId)}
+          onAccept={handleMissionAccepted}
+          onDecline={handleMissionDeclined}
+        />
+      )}
+
+      {gameState === GAME_STATES.CHALLENGE && (
+        <div className="flex-1 flex flex-col md:flex-row gap-6 p-4 md:p-6 overflow-hidden max-w-7xl w-full mx-auto">
+          <ChallengeSidebar
+            challenges={QuestManager.getAllChallenges()}
+            completedIds={progress.completedIds}
+            unlockedIds={progress.unlockedIds}
+            currentId={progress.currentChallengeId}
+            onSelect={selectChallenge}
+            xp={progress.xp}
+            coins={progress.coins}
+          />
+
+          <ChallengePanel
+            challenge={currentChallenge}
+            onSuccess={handleChallengeSuccess}
+            isAlreadyCompleted={isChallengeCompleted}
+          />
+        </div>
+      )}
+
+     {gameState === GAME_STATES.REWARD && (
+
+  <RewardPopup
+
+    rewards={lastEarnedRewards || currentChallenge.rewards}
+
+    onClaim={handleRewardClaimed}
+
+  />
+
+)}
+    </div>
+  );
+}

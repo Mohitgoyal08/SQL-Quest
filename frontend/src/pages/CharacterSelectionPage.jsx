@@ -35,13 +35,29 @@ const CHARACTERS = [
   },
 ];
 
-export default function CharacterSelectionPage() {
+export default function CharacterSelectionPage({ onComplete }) {
   const [selectedHero, setSelectedHero] = useState(null);
 
   const handleBeginAdventure = () => {
     if (!selectedHero) return;
-    console.log('Starting adventure with hero:', selectedHero);
-  };
+
+    const selected = CHARACTERS.find(
+        (c) => c.id === selectedHero
+    );
+
+    if (!selected) return;
+
+    const profile = {
+        name: selected.name,
+        avatar: selected.id,
+    };
+
+    console.log("Starting adventure:", profile);
+
+    if (typeof onComplete === "function") {
+        onComplete(profile);
+    }
+};
 
   const selectedHeroData = CHARACTERS.find((c) => c.id === selectedHero);
 

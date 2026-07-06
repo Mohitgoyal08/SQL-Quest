@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { SQLChallenge, ChallengeRewards } from '../../data/challenges';
-import { ChallengeValidator } from '../../utils/sqlValidator';
+import { DatabaseBootstrap } from '../../database/DatabaseBootstrap';
+import { SQLEngineService } from '../../engine/SQLEngineService';
+import { ResultValidator } from '../../engine/ResultValidator';
 import { analyzeSQLMistakes } from '../../utils/hintEngine';
+import ResultTable from './ResultTable';
 
 interface ChallengePanelProps {
   challenge: SQLChallenge;
@@ -18,29 +21,69 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
   const [status, setStatus] = useState<'IDLE' | 'SUCCESS' | 'ERROR'>('IDLE');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [showHints, setShowHints] = useState<boolean>(false);
+  
+  // SQLite Execution Engine States
+  const [queryResult, setQueryResult] = useState<any | null>(null);
+  const [isExecuting, setIsExecuting] = useState<boolean>(false);
 
-  // Synchronize state when switching challenges
+  // Synchronize state and boot WASM database when switching challenges
   useEffect(() => {
     setQuery(challenge.starterCode);
     setStatus('IDLE');
     setFeedbackMessage('');
     setShowHints(false);
+    setQueryResult(null);
+
+    // Pre-warm the WebAssembly SQLite database engine in the background
+    DatabaseBootstrap.initialize().catch((err) => {
+      console.error('ChallengePanel: SQLite Boot Failed:', err);
+    });
   }, [challenge]);
 
-  const handleRunQuery = () => {
-    // Delegate to central validator using the updated validation object
-    const isCorrect = ChallengeValidator.validate(query, challenge.validation);
+  const handleRunQuery = async () => {
+    setIsExecuting(true);
+    setStatus('IDLE');
+    setFeedbackMessage('');
 
-    if (isCorrect) {
-      setStatus('SUCCESS');
-      setFeedbackMessage("Query Executed Successfully! The harbor records confirm your findings.");
-      onSuccess(challenge.id, challenge.rewards, challenge.nextChallengeId);
-    } else {
+    try {
+      // 1. Ensure schema is bootstrapped and seeded exactly once
+      await DatabaseBootstrap.initialize();
+
+      // 2. Execute Player Query against in-memory SQLite
+      const playerRes = await SQLEngineService.executeQuery(query);
+      setQueryResult(playerRes);
+
+      // 3. Resolve Target Canonical Reference Query
+      const referenceSql = challenge.referenceQuery;
+      const expectedRes = await SQLEngineService.executeQuery(referenceSql);
+
+      // 4. Determine ordered comparison requirement (ORDER BY / LIMIT / EXACT validation)
+      const requiresOrder = 
+        challenge.validation?.type === 'EXACT' || 
+        /\b(order\s+by|limit)\b/i.test(referenceSql || '');
+
+      // 5. Deep Matrix Result Set Comparison
+      const validation = ResultValidator.validate(playerRes, expectedRes, requiresOrder);
+
+      if (validation.isValid) {
+        setStatus('SUCCESS');
+        setFeedbackMessage(validation.feedback);
+        // Trigger orchestrator success pipeline to launch RewardPopup
+        onSuccess(challenge.id, challenge.rewards, challenge.nextChallengeId);
+      } else {
+        setStatus('ERROR');
+        // Provide semantic dataset feedback if execution succeeded, or fallback to hint analysis on syntax errors
+        const diagnosticText = playerRes.success
+          ? validation.feedback
+          : analyzeSQLMistakes(query, referenceSql, challenge.hints);
+        
+        setFeedbackMessage(diagnosticText);
+      }
+    } catch (err: any) {
       setStatus('ERROR');
-      // Pass expected query fallback string to hint engine if needed
-      const fallbackExpected = challenge.validation.expected;
-      const hintFeedback = analyzeSQLMistakes(query, fallbackExpected, challenge.hints);
-      setFeedbackMessage(hintFeedback);
+      setFeedbackMessage(err.message || 'System fault encountered during query execution.');
+    } finally {
+      setIsExecuting(false);
     }
   };
 
@@ -48,6 +91,7 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
     setQuery(challenge.starterCode);
     setStatus('IDLE');
     setFeedbackMessage('');
+    setQueryResult(null);
   };
 
   return (
@@ -65,11 +109,11 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
           </div>
           <div className="flex items-center gap-2">
             {isAlreadyCompleted && (
-              <span className="px-2.5 py-0.5 bg-emerald-800 text-emerald-100 rounded text-xs font-bold uppercase tracking-wider border border-emerald-600 shadow-inner">
+              <span className="px-2.5 py-0.5 bg-emerald-800 text-emerald-100 rounded text-xs font-bold uppercase tracking-wider border border-emerald-600 shadow-inner select-none">
                 ✔ Completed
               </span>
             )}
-            <span className="px-3 py-1 bg-[#ebd9b4] text-[#5c4424] rounded-full text-xs font-bold uppercase tracking-wider border border-[#8c6b3e]/60">
+            <span className="px-3 py-1 bg-[#ebd9b4] text-[#5c4424] rounded-full text-xs font-bold uppercase tracking-wider border border-[#8c6b3e]/60 select-none">
               {challenge.difficulty}
             </span>
           </div>
@@ -94,22 +138,25 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             rows={4}
+            disabled={isExecuting}
             placeholder="Enter your SQL query here..."
-            className="w-full p-3 bg-[#0b1d28] text-emerald-400 font-mono text-sm md:text-base rounded-lg border-2 border-[#8c6b3e] shadow-inner focus:outline-none focus:border-amber-500 resize-y"
+            className="w-full p-3 bg-[#0b1d28] text-emerald-400 font-mono text-sm md:text-base rounded-lg border-2 border-[#8c6b3e] shadow-inner focus:outline-none focus:border-amber-500 resize-y disabled:opacity-60"
           />
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 select-none">
           <div className="flex items-center gap-2">
             <button
               onClick={handleRunQuery}
-              className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm uppercase tracking-wider rounded-lg border-2 border-emerald-900 shadow-md transition-all cursor-pointer flex items-center gap-2"
+              disabled={isExecuting}
+              className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-950 text-white font-extrabold text-sm uppercase tracking-wider rounded-lg border-2 border-emerald-900 shadow-md transition-all cursor-pointer flex items-center gap-2"
             >
-              <span>▶ Run Query</span>
+              <span>{isExecuting ? '⏳ Executing...' : '▶ Run Query'}</span>
             </button>
             <button
               onClick={handleReset}
+              disabled={isExecuting}
               className="px-4 py-2.5 bg-[#ebd9b4] hover:bg-[#dfcb9f] text-[#5c4424] font-bold text-xs uppercase tracking-wider rounded-lg border border-[#8c6b3e]/60 transition-colors cursor-pointer"
             >
               Reset
@@ -124,6 +171,11 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
           </button>
         </div>
 
+        {/* Real Relational Result Table Viewport */}
+        <div className="mb-6">
+          <ResultTable result={queryResult} isLoading={isExecuting} />
+        </div>
+
         {/* Dynamic Result & Hint Feedback Console */}
         {status !== 'IDLE' && (
           <div
@@ -134,7 +186,7 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
             }`}
           >
             <div className="font-extrabold text-sm uppercase tracking-wider mb-1">
-              {status === 'SUCCESS' ? '✔ Mission Accomplished!' : '⚠ Query Failed'}
+              {status === 'SUCCESS' ? '✔ Mission Accomplished!' : '⚠ Validation Discrepancy'}
             </div>
             <p className="text-sm font-medium">{feedbackMessage}</p>
           </div>
@@ -156,7 +208,7 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
       </div>
 
       {/* Reward Preview Footer */}
-      <div className="border-t-2 border-[#8c6b3e]/40 pt-4 flex items-center justify-between">
+      <div className="border-t-2 border-[#8c6b3e]/40 pt-4 flex items-center justify-between select-none">
         <span className="text-xs font-bold uppercase tracking-widest text-[#8c6b3e]">
           Bounty Reward Preview
         </span>
