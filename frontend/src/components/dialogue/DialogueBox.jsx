@@ -6,7 +6,9 @@ import ContinueIndicator from './ContinueIndicator';
 export default function DialogueBox({
   dialogue,
   onContinue,
-  canContinue = true
+  canContinue = true,
+  onTypingComplete,
+  registerFinishHandler
 }) {
   const {
     speaker,
@@ -28,7 +30,11 @@ export default function DialogueBox({
           <h3 className="text-md font-bold uppercase tracking-widest text-[#8c6b3e] mb-2 select-none">
             {speaker}
           </h3>
-          <TypewriterText text={text} />
+          <TypewriterText 
+            text={text} 
+            onTypingComplete={onTypingComplete}
+            registerFinishHandler={registerFinishHandler}
+          />
         </div>
 
         <div className="flex justify-end mt-4">
