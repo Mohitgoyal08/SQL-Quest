@@ -171,3 +171,30 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
     nextChallengeId: null
   }
 ];
+export interface SQLChallenge {
+  id: string;
+  chapter: number;
+  islandId: string;
+  npcId: string;
+  title: string;
+  story: string;
+  description: string;
+  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
+  starterCode: string;
+  referenceQuery: string;
+  loadingMessage?: string; // <-- Added optional property cleanly
+  validation?: {
+    type: string;
+    expected?: string;
+    pattern?: string;
+  };
+  hints: string[];
+  rewards: {
+    xp: number;
+    coins: number;
+    gems?: number;
+    item?: string;
+    badge?: string;
+  };
+  nextChallengeId: string | null;
+}
