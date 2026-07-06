@@ -1,81 +1,87 @@
-import React, { useState } from 'react';
-import MissionScene from './components/mission/MissionScene';
-import { tutorialMission } from './data/missions/tutorialMission';
+import React from 'react';
+import { useChallengeProgress } from './hooks/useChallengeProgress';
+import { SQL_CHALLENGES } from './data/challenges';
+import { ChallengeSidebar } from './components/challenge/ChallengeSidebar';
+import { ChallengePanel } from './components/challenge/ChallengePanel';
 
 export default function App() {
-  const [missionState, setMissionState] = useState('BRIEFING'); // BRIEFING | ACCEPTED | SQL_CHALLENGE | DECLINED
+  const { progress, completeChallenge, selectChallenge } = useChallengeProgress();
 
-  const handleAccept = () => {
-    setMissionState('ACCEPTED');
-    setTimeout(() => {
-      setMissionState('SQL_CHALLENGE');
-    }, 1200);
-  };
+  // Find active challenge metadata or fallback to the first novice challenge
+  const currentChallenge = 
+    SQL_CHALLENGES.find((c) => c.id === progress.currentChallengeId) || SQL_CHALLENGES[0];
+  
+  const isCompleted = progress.completedIds.includes(currentChallenge.id);
 
-  const handleDecline = () => {
-    setMissionState('DECLINED');
+  // Helper to clear localStorage during sandbox testing
+  const handleResetSaveData = () => {
+    localStorage.removeItem('sql_quest_player_save_v2');
+    localStorage.removeItem('sql_quest_player_save_v1');
+    window.location.reload();
   };
 
   return (
-    <main className="w-screen h-screen bg-slate-950 flex items-center justify-center font-sans overflow-hidden relative select-none">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0b1d28] to-[#040c12] opacity-90 z-0" />
+    <main className="w-screen h-screen bg-slate-950 flex flex-col justify-between font-sans overflow-hidden relative select-none">
+      {/* Background Atmosphere */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0b1d28] to-[#040c12] opacity-95 z-0 pointer-events-none" />
 
-      {missionState === 'BRIEFING' && (
-        <MissionScene
-          mission={tutorialMission}
-          onAccept={handleAccept}
-          onDecline={handleDecline}
-        />
-      )}
-
-      {missionState === 'ACCEPTED' && (
-        <div className="z-10 bg-[#fdf6e2] border-4 border-[#8c6b3e] rounded-xl p-8 max-w-md text-center shadow-2xl animate-pulse">
-          <h2 className="text-2xl font-extrabold text-[#5c4424] mb-2">Mission Accepted!</h2>
-          <p className="text-amber-950 font-medium text-sm">
-            Unfurling the query ledger...
-          </p>
+      {/* Top Navigation / App Bar */}
+      <header className="relative z-10 bg-[#fdf6e2] border-b-4 border-[#8c6b3e] px-6 py-3 flex items-center justify-between shadow-md">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🏴‍☠️</span>
+          <div>
+            <h1 className="font-black text-lg md:text-xl text-[#5c4424] tracking-wider uppercase leading-none">
+              SQL Quest: Challenge Arena
+            </h1>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#8c6b3e]">
+              Island: {progress.currentIsland || 'Tutorial Harbor'} | Chapter {currentChallenge.chapter || 1}
+            </span>
+          </div>
         </div>
-      )}
 
-      {missionState === 'SQL_CHALLENGE' && (
-        <div className="z-10 bg-[#fdf6e2] border-4 border-[#8c6b3e] rounded-2xl p-8 max-w-xl w-full text-center shadow-2xl mx-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#8c6b3e] block mb-1">
-            Active Encounter: {tutorialMission.title}
-          </span>
-          <h2 className="text-3xl font-black text-[#5c4424] mb-4">SQL Challenge Arena</h2>
-          
-          <div className="p-6 bg-[#ebd9b4]/50 border-2 border-dashed border-[#8c6b3e]/60 rounded-xl mb-6 text-left">
-            <p className="text-amber-950 font-medium text-sm md:text-base mb-2">
-              <strong>Objective:</strong> Retrieve all records from the <code className="bg-[#fdf6e2] px-1.5 py-0.5 rounded border border-[#8c6b3e]/40">ships</code> table.
-            </p>
-            <p className="text-xs text-[#8c6b3e] italic">
-              Interactive SQL Execution Engine coming in Sprint 8.
-            </p>
+        {/* Global Player Ledger Bar */}
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 bg-[#ebd9b4] px-3 py-1 rounded-lg border border-[#8c6b3e]/60 shadow-inner text-xs font-extrabold text-[#5c4424]">
+            <span>⚡ Level {progress.level || 1}</span>
+            <span className="opacity-40">|</span>
+            <span className="text-amber-600">★ {progress.xp} XP</span>
+            <span className="opacity-40">|</span>
+            <span className="text-yellow-600">🪙 {progress.coins} Gold</span>
+            {progress.gems > 0 && (
+              <>
+                <span className="opacity-40">|</span>
+                <span className="text-purple-700">💎 {progress.gems} Gems</span>
+              </>
+            )}
           </div>
 
           <button
-            onClick={() => setMissionState('BRIEFING')}
-            className="px-6 py-2.5 bg-[#8c6b3e] hover:bg-[#725630] text-white font-bold rounded-lg shadow transition-colors uppercase tracking-wider text-xs cursor-pointer"
+            onClick={handleResetSaveData}
+            className="text-xs font-bold uppercase tracking-wider text-red-900 bg-red-200/80 border border-red-500/60 px-3 py-1.5 rounded hover:bg-red-300 transition-colors cursor-pointer shadow-sm"
           >
-            Reset Sandbox Loop
+            Reset Save
           </button>
         </div>
-      )}
+      </header>
 
-      {missionState === 'DECLINED' && (
-        <div className="z-10 bg-[#fdf6e2] border-4 border-[#8c6b3e] rounded-xl p-8 max-w-md text-center shadow-2xl">
-          <h2 className="text-xl font-bold text-[#5c4424] mb-2">Mission Declined</h2>
-          <p className="text-amber-950 font-medium text-sm mb-6">
-            The harbor awaits whenever you find the courage to chart the query.
-          </p>
-          <button
-            onClick={() => setMissionState('BRIEFING')}
-            className="px-6 py-2 bg-[#8c6b3e] text-white font-bold rounded shadow hover:bg-[#725630] transition-colors uppercase tracking-wider text-xs cursor-pointer"
-          >
-            Re-open Briefing
-          </button>
-        </div>
-      )}
+      {/* Workspace Split Layout */}
+      <div className="relative z-10 flex-1 flex flex-col md:flex-row gap-6 p-4 md:p-6 overflow-hidden max-w-7xl w-full mx-auto">
+        <ChallengeSidebar
+          challenges={SQL_CHALLENGES}
+          completedIds={progress.completedIds}
+          unlockedIds={progress.unlockedIds}
+          currentId={progress.currentChallengeId}
+          onSelect={selectChallenge}
+          xp={progress.xp}
+          coins={progress.coins}
+        />
+
+        <ChallengePanel
+          challenge={currentChallenge}
+          onSuccess={completeChallenge}
+          isAlreadyCompleted={isCompleted}
+        />
+      </div>
     </main>
   );
 }
