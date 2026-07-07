@@ -6,8 +6,10 @@ import { ResultValidator } from '../../engine/ResultValidator';
 import { analyzeSQLMistakes } from '../../utils/hintEngine';
 // ===== Sprint 9.3 START =====
 import ExecutionTerminal from './ExecutionTerminal';
-
 const MIN_EXECUTION_DELAY_MS = 600;
+
+const AUTO_ADVANCE_DELAY_MS = 600;
+
 // ===== Sprint 9.3 END =====
 
 interface ChallengePanelProps {
@@ -36,22 +38,29 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
   // ===== Sprint 9.3 END =====
 
   // Synchronize state and boot WASM database when switching challenges
+  // ===== Sprint 9.3 Regression Fix START =====
+  // Proper timer cleanup to avoid memory leaks during staged success animations
   useEffect(() => {
-    setQuery(challenge.starterCode);
-    setStatus('IDLE');
-    setFeedbackMessage('');
-    setShowHints(false);
-    setQueryResult(null);
-    // ===== Sprint 9.3 START =====
-    setSuccessStep(0);
-    // ===== Sprint 9.3 END =====
+    let timer: NodeJS.Timeout;
 
-    // Pre-warm the WebAssembly SQLite database engine in the background
-    DatabaseBootstrap.initialize().catch((err) => {
-      console.error('ChallengePanel: SQLite Boot Failed:', err);
-    });
-  }, [challenge]);
+    if (status === 'SUCCESS') {
+      if (successStep === 1) {
+        timer = setTimeout(() => setSuccessStep(2), 400);
+      } else if (successStep === 2) {
+        timer = setTimeout(() => setSuccessStep(3), 400);
+      } else if (successStep === 3) {
+        // Automatically trigger original completion card & dialogue loop
+        timer = setTimeout(() => {
+          onSuccess(challenge.id, challenge.rewards, challenge.nextChallengeId);
+        }, AUTO_ADVANCE_DELAY_MS);
+      }
+    }
 
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [status, successStep, challenge, onSuccess]);
+  // ===== Sprint 9.3 Regression Fix END =====
   // ===== Sprint 9.3 START =====
   // Proper timer cleanup to avoid memory leaks during staged success animations
   useEffect(() => {
@@ -330,17 +339,7 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
           </div>
         </div>
 
-        {/* ===== Sprint 9.3 START ===== */}
-        {status === 'SUCCESS' && successStep >= 3 && (
-          <button
-            onClick={handleContinue}
-            className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs md:text-sm uppercase tracking-widest rounded-lg border-2 border-amber-900 shadow-lg transition-transform transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-2 animate-pulse"
-          >
-            <span>Continue Journey</span>
-            <span>▶</span>
-          </button>
-        )}
-        {/* ===== Sprint 9.3 END ===== */}
+        
       </div>
     </div>
   );
