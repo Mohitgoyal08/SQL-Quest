@@ -1,7 +1,10 @@
 // ===== Sprint 9.6 =====
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { InventoryItem } from '../../inventory/models/InventoryItem';
 import { ItemRarity } from '../../inventory/models/ItemTypes';
+// ===== Sprint 10.2 Interactive Inventory Foundation START =====
+import { ItemUseService, ItemUseResult } from '../../inventory/services/ItemUseService';
+// ===== Sprint 10.2 Interactive Inventory Foundation END =====
 
 interface InventoryItemModalProps {
   isOpen: boolean;
@@ -23,6 +26,24 @@ export const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // ===== Sprint 10.2 Interactive Inventory Foundation START =====
+  const [useResult, setUseResult] = useState<ItemUseResult | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setUseResult(null);
+    }
+  }, [item, isOpen]);
+
+  const handleUseItem = () => {
+    if (!item) return;
+    const result = ItemUseService.useItem(item.id);
+    setUseResult(result);
+  };
+
+  const isUsed = useResult?.effect === 'MARK_USED';
+  // ===== Sprint 10.2 Interactive Inventory Foundation END =====
 
   // Focus trap & Escape key handler (uses capture phase to prevent closing outer panel)
   useEffect(() => {
@@ -102,14 +123,44 @@ export const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
           </p>
         </div>
 
-        {/* Close Controls */}
-        <button
-          ref={closeBtnRef}
-          onClick={onClose}
-          className="mt-4 w-full px-6 py-3.5 bg-[#8c6b3e] hover:bg-[#5c4424] text-[#fdf6e2] font-black text-xs uppercase tracking-widest rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-amber-500/50 shadow-md cursor-pointer"
-        >
-          Stop Inspecting
-        </button>
+        {/* ===== Sprint 10.2 Interactive Inventory Foundation START ===== */}
+        {useResult && (
+          <div className={`w-full p-3 mb-2 rounded-lg border-2 text-center text-sm font-bold ${
+            useResult.success 
+              ? 'bg-[#ebd9b4] border-[#8c6b3e] text-[#5c4424]' 
+              : 'bg-red-100 border-red-500 text-red-900'
+          }`}>
+            {useResult.message}
+          </div>
+        )}
+        {/* ===== Sprint 10.2 Interactive Inventory Foundation END ===== */}
+
+        {/* Action Controls */}
+        <div className="mt-4 flex gap-4 w-full">
+          {/* ===== Sprint 10.2 Interactive Inventory Foundation START ===== */}
+          {item.usable !== false && (
+            <button
+              onClick={handleUseItem}
+              disabled={isUsed}
+              className={`flex-1 px-6 py-3.5 font-black text-xs uppercase tracking-widest rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-amber-500/50 shadow-md ${
+                isUsed
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed border-2 border-gray-500'
+                  : 'bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 cursor-pointer'
+              }`}
+            >
+              {isUsed ? 'Used' : 'Use Item'}
+            </button>
+          )}
+          {/* ===== Sprint 10.2 Interactive Inventory Foundation END ===== */}
+          
+          <button
+            ref={closeBtnRef}
+            onClick={onClose}
+            className="flex-1 px-6 py-3.5 bg-[#8c6b3e] hover:bg-[#5c4424] text-[#fdf6e2] font-black text-xs uppercase tracking-widest rounded-xl transition-colors focus:outline-none focus:ring-4 focus:ring-amber-500/50 shadow-md cursor-pointer"
+          >
+            Stop Inspecting
+          </button>
+        </div>
       </div>
     </div>
   );

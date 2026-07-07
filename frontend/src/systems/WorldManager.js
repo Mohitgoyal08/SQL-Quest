@@ -23,13 +23,11 @@ export class WorldManager {
    */
   static isIslandAccessible(
     islandRequirements,
-    completedChallengeIds,
-    hasItem
+    progress
   ) {
     return this.checkRequirements(
       islandRequirements,
-      completedChallengeIds,
-      hasItem
+      progress
     );
   }
 
@@ -38,13 +36,11 @@ export class WorldManager {
    */
   static isNPCAccessible(
     npcRequirements,
-    completedChallengeIds,
-    hasItem
+    progress
   ) {
     return this.checkRequirements(
       npcRequirements,
-      completedChallengeIds,
-      hasItem
+      progress
     );
   }
 
@@ -53,13 +49,11 @@ export class WorldManager {
    */
   static isLocationUnlocked(
     locationRequirements,
-    completedChallengeIds,
-    hasItem
+    progress
   ) {
     return this.checkRequirements(
       locationRequirements,
-      completedChallengeIds,
-      hasItem
+      progress
     );
   }
 
@@ -69,27 +63,80 @@ export class WorldManager {
    */
   static checkRequirements(
     requirements,
-    completedChallengeIds,
-    hasItem
+    progress
   ) {
     if (!requirements) return true;
 
     if (
       requirements.requiredItem &&
-      !hasItem(requirements.requiredItem)
+      !progress?.inventory?.includes(requirements.requiredItem)
     ) {
       return false;
     }
 
     if (
       requirements.requiredChallengeId &&
-      !completedChallengeIds.includes(
-        requirements.requiredChallengeId
-      )
+      !progress?.completedIds?.includes(requirements.requiredChallengeId)
     ) {
       return false;
     }
 
     return true;
   }
-}
+
+  /**
+   * Centralizes compatibility between legacy and new requirement formats.
+   */
+  static normalizeRequirements(
+
+    requirements,
+
+    legacyRequiredItem
+
+  ) {
+
+    // New API always wins.
+
+    if (requirements) {
+
+      return requirements;
+
+    }
+
+    const normalized = {};
+
+    // Legacy Sprint 9.7 compatibility
+
+    if (legacyRequiredItem) {
+
+      normalized.requiredItem = legacyRequiredItem;
+
+    }
+
+    return Object.keys(normalized).length > 0
+
+      ? normalized
+
+      : undefined;
+
+  }
+
+  /**
+   * Evaluates whether a challenge is accessible.
+   */
+  static isChallengeAccessible(
+    challengeRequirements,
+    legacyRequiredItem,
+    progress
+  ) {
+    const normalizedReqs = this.normalizeRequirements(
+      challengeRequirements,
+      legacyRequiredItem
+    );
+
+    return this.checkRequirements(
+      normalizedReqs,
+      progress
+    );
+  }
+} 

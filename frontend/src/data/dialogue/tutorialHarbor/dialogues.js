@@ -15,17 +15,38 @@ export const TUTORIAL_DIALOGUES = {
   ],
   chal_02: [
     {
-      id: "node_1",
-      speaker: "Quartermaster Flint",
-      avatar: "📜",
-      text: "Aye, the Captain got his full headcount. But I'm the Quartermaster, and reading through fifty columns of birthdates and hometowns gives me a splitting headache.",
+      requirements: { requiredItem: 'beginners_compass' },
+      dialogue: [
+        {
+          id: "node_1",
+          speaker: "Quartermaster Flint",
+          avatar: "📜",
+          text: "I see you hold the Captain's compass. That means you've passed his inspection, but I only care about results, not shiny trinkets.",
+        },
+        {
+          id: "node_2",
+          speaker: "Quartermaster Flint",
+          avatar: "📜",
+          text: "Strip that ledger down for daily roll call! Query the 'employees' table again, but this time retrieve ONLY the 'name' column.",
+        }
+      ]
     },
     {
-      id: "node_2",
-      speaker: "Quartermaster Flint",
-      avatar: "📜",
-      text: "Strip that ledger down for daily roll call! Query the 'employees' table again, but this time retrieve ONLY the 'name' column.",
-    },
+      dialogue: [
+        {
+          id: "node_1",
+          speaker: "Quartermaster Flint",
+          avatar: "📜",
+          text: "Aye, the Captain got his full headcount. But I'm the Quartermaster, and reading through fifty columns of birthdates and hometowns gives me a splitting headache.",
+        },
+        {
+          id: "node_2",
+          speaker: "Quartermaster Flint",
+          avatar: "📜",
+          text: "Strip that ledger down for daily roll call! Query the 'employees' table again, but this time retrieve ONLY the 'name' column.",
+        }
+      ]
+    }
   ],
   chal_03: [
     {

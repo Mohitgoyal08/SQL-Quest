@@ -1,13 +1,29 @@
 import { DialogueRepository } from '../data/repositories/DialogueRepository';
 import { MissionRepository } from '../data/repositories/MissionRepository';
 import { SQL_CHALLENGES } from '../data/challenges';
+import { WorldManager } from './WorldManager';
 
 export class QuestManager {
   /**
    * Delegates dialogue lookup directly to the scalable DialogueRepository.
+   * Evaluates requirements if the dialogue uses the reactive branch schema.
    */
-  static getDialogueForNPC(npcId, challengeId) {
-    return DialogueRepository.getDialogue(npcId, challengeId);
+  static getDialogueForNPC(npcId, challengeId, progress) {
+    const rawDialogue = DialogueRepository.getDialogue(npcId, challengeId);
+    
+    // Check if this is the new reactive branched schema
+    if (Array.isArray(rawDialogue) && rawDialogue.length > 0 && rawDialogue[0].dialogue) {
+      for (const branch of rawDialogue) {
+        if (WorldManager.checkRequirements(branch.requirements, progress)) {
+          return branch.dialogue;
+        }
+      }
+      // Fallback if no branches match (should ideally have a default branch)
+      return [];
+    }
+
+    // Legacy unbranched schema
+    return rawDialogue;
   }
 
   static getMissionForChallenge(challengeId) {

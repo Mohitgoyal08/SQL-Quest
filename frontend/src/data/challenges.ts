@@ -1,3 +1,4 @@
+import { WorldRequirement } from '../types/WorldTypes';
 export interface ChallengeRewards {
   xp: number;
   coins: number;
@@ -15,20 +16,45 @@ export interface ChallengeValidation {
 export interface SQLChallenge {
   id: string;
   title: string;
+
   chapter: number;
   islandId: string;
   npcId: string;
+
   description: string;
   story: string;
+
   difficulty: 'Novice' | 'Intermediate' | 'Advanced';
+
   validation: ChallengeValidation;
+
   starterCode: string;
 
-  // Canonical executable SQL used by the SQLite engine
+  /**
+   * Canonical executable SQL used by the SQLite engine.
+   */
   referenceQuery: string;
 
+  /**
+   * Optional loading message shown while the SQL engine executes.
+   */
+  loadingMessage?: string;
+
+  /**
+   * @deprecated Legacy compatibility field from Sprint 9.7.
+   * Use `requirements` for all new content.
+   */
+  requiredItem?: string;
+
+  /**
+   * Canonical requirement definition used by the Requirement Gate Engine.
+   */
+  requirements?: WorldRequirement;
+
   hints: string[];
+
   rewards: ChallengeRewards;
+
   nextChallengeId: string | null;
 }
 
@@ -228,3 +254,40 @@ export interface SQLChallenge {
   nextChallengeId: string | null;
 }
 // ===== Sprint 9.7 Patch END =====
+export interface SQLChallenge {
+  id: string;
+  chapter: number;
+  islandId: string;
+  npcId: string;
+  title: string;
+  story: string;
+  description: string;
+  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
+  starterCode: string;
+  referenceQuery: string;
+  loadingMessage?: string;
+  
+  /** 
+   * @deprecated Legacy compatibility field from Sprint 9.7. 
+   * Use the unified `requirements` object for all new content. 
+   */
+  requiredItem?: string;
+  
+  requirements?: WorldRequirement; // Canonical API going forward
+  
+  validation?: {
+    type: string;
+    expected?: string;
+    pattern?: string;
+  };
+  hints: string[];
+  rewards: {
+    xp: number;
+    coins: number;
+    gems?: number;
+    item?: string;
+    badge?: string;
+  };
+  nextChallengeId: string | null;
+}
+// ===== Sprint 9.8 Patch END =====

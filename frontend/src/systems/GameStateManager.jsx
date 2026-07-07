@@ -90,7 +90,7 @@ const totalItemCount = items.reduce(
 
       {gameState === GAME_STATES.DIALOGUE && (
         <DialogueScene
-          dialogue={QuestManager.getDialogueForNPC(worldState.currentNPC, progress.currentChallengeId)}
+          dialogue={QuestManager.getDialogueForNPC(worldState.currentNPC, progress.currentChallengeId, progress)}
           onComplete={handleDialogueComplete}
         />
       )}
@@ -107,12 +107,8 @@ const totalItemCount = items.reduce(
         <div className="flex-1 flex flex-col md:flex-row gap-6 p-4 md:p-6 overflow-hidden max-w-7xl w-full mx-auto">
           <ChallengeSidebar
             challenges={QuestManager.getAllChallenges()}
-            completedIds={progress.completedIds}
-            unlockedIds={progress.unlockedIds}
-            currentId={progress.currentChallengeId}
+            progress={progress}
             onSelect={selectChallenge}
-            xp={progress.xp}
-            coins={progress.coins}
           />
 
           <ChallengePanel

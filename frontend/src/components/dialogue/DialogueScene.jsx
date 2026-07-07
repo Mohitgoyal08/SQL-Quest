@@ -1,21 +1,42 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DialogueBox from './DialogueBox';
+import { useDialogueState } from '../../hooks/useDialogueState';
 
 export default function DialogueScene({ dialogue = [], onComplete }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const {
+    currentDialogue,
+    currentIndex,
+    next,
+    reset,
+    isFinished,
+  } = useDialogueState(dialogue);
+
   const [isTypingFinished, setIsTypingFinished] = useState(false);
-  
+
   const finishTypingRef = useRef(null);
   const isTypingFinishedRef = useRef(isTypingFinished);
 
-  // Synchronize ref with state to prevent stale closures in event listeners
+  // Keep typing state synchronized
   useEffect(() => {
     isTypingFinishedRef.current = isTypingFinished;
   }, [isTypingFinished]);
 
+  // Reset typing whenever dialogue line changes
   useEffect(() => {
     setIsTypingFinished(false);
   }, [currentIndex]);
+
+  // Reset dialogue when a completely new conversation is loaded
+  useEffect(() => {
+    reset();
+  }, [dialogue, reset]);
+
+  // Observe dialogue completion
+  useEffect(() => {
+    if (isFinished && typeof onComplete === 'function') {
+      onComplete();
+    }
+  }, [isFinished, onComplete]);
 
   const handleTypingComplete = useCallback(() => {
     setIsTypingFinished(true);
@@ -25,32 +46,19 @@ export default function DialogueScene({ dialogue = [], onComplete }) {
     finishTypingRef.current = fn;
   }, []);
 
-  if (!dialogue || dialogue.length === 0) {
+  if (!dialogue || dialogue.length === 0 || !currentDialogue) {
     return null;
   }
 
-  const currentDialogue = dialogue[currentIndex];
-
-  const handleNextLine = useCallback(() => {
-    if (currentIndex < dialogue.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      if (typeof onComplete === 'function') {
-        onComplete();
-      }
-    }
-  }, [currentIndex, dialogue.length, onComplete]);
-
-  // Unified controller reading dynamically from fresh refs
   const handleInteraction = useCallback(() => {
     if (!isTypingFinishedRef.current) {
       if (typeof finishTypingRef.current === 'function') {
         finishTypingRef.current();
       }
     } else {
-      handleNextLine();
+      next();
     }
-  }, [handleNextLine]);
+  }, [next]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -61,6 +69,7 @@ export default function DialogueScene({ dialogue = [], onComplete }) {
     };
 
     window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };

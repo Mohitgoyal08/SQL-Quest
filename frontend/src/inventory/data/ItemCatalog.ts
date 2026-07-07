@@ -11,7 +11,7 @@ export const ITEM_CATALOG: Record<string, Omit<InventoryItem, 'quantity'>> = {
     rarity: ItemRarity.COMMON,
     stackable: false,
     maxStack: 1,
-    usable: false,
+    usable: true,
     tradable: false,
     questItem: false
   },
@@ -50,7 +50,7 @@ export const ITEM_CATALOG: Record<string, Omit<InventoryItem, 'quantity'>> = {
     rarity: ItemRarity.RARE,
     stackable: false,
     maxStack: 1,
-    usable: false,
+    usable: true,
     tradable: false,
     questItem: true
   },
@@ -68,29 +68,16 @@ export const ITEM_CATALOG: Record<string, Omit<InventoryItem, 'quantity'>> = {
     questItem: false
   },
   spyglass_truth: {
-
   id: 'spyglass_truth',
-
   name: 'Spyglass of Truth',
-
   description: 'A finely crafted spyglass that reveals distant secrets hidden across the SQL seas.',
-
   icon: '🔭',
-
   category: ItemCategory.TOOL,
-
   rarity: ItemRarity.RARE,
-
   stackable: false,
-
   maxStack: 1,
-
-  usable: false,
-
+  usable: true,
   tradable: false,
-
   questItem: false
-
 }
-
 };
