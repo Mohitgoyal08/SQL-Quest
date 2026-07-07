@@ -4,7 +4,7 @@ import GameStateManager from './systems/GameStateManager';
 import { useChallengeProgress } from './hooks/useChallengeProgress';
 import { WorldManager } from './systems/WorldManager';
 import { PlayerProfileService } from './services/PlayerProfileService';
-
+import { InventoryProvider } from './inventory/context/InventoryContext';
 export default function App() {
   const { progress, completeChallenge, selectChallenge } = useChallengeProgress();
   const [playerProfile, setPlayerProfile] = useState(() => PlayerProfileService.loadProfile());
@@ -13,6 +13,7 @@ export default function App() {
   const worldState = WorldManager.getWorldState(progress);
 
   return (
+    <InventoryProvider> 
     <MainGameLayout 
       playerProfile={playerProfile} 
       progress={progress} 
@@ -26,5 +27,7 @@ export default function App() {
         onProfileChange={setPlayerProfile}
       />
     </MainGameLayout>
+    </InventoryProvider>
+    
   );
 }

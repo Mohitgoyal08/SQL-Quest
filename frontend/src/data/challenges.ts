@@ -55,7 +55,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
     rewards: {
       xp: 100,
       coins: 25,
-      item: "Beginner's Compass"
+      item: "Beginners_Compass"
     },
     nextChallengeId: "chal_02"
   },
@@ -110,7 +110,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
     rewards: {
       xp: 150,
       coins: 45,
-      badge: "Coin Counter"
+      badge: "Coin_Counter"
     },
     nextChallengeId: "chal_04"
   },
@@ -166,7 +166,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       coins: 100,
       gems: 25,
       badge: "Fleet Master",
-      item: "Spyglass of Truth"
+      item: "Spyglass_truth"
     },
     nextChallengeId: null
   }

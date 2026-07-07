@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { GAME_STATES } from '../config/gameStates';
 import { QuestManager } from './QuestManager';
-import { WorldManager } from './WorldManager';
 import { PlayerProfileService } from '../services/PlayerProfileService';
 import RewardPopup from '../components/mission/RewardPopup';
+import { useInventory } from '../inventory/hooks/useInventory';
+import { InventoryButton } from '../components/inventory/InventoryButton';
+import { InventoryPanel } from '../components/inventory/InventoryPanel';
 
 import LandingPage from '../pages/LandingPage';
 import CharacterSelectionPage from '../pages/CharacterSelectionPage';
@@ -22,6 +24,13 @@ export default function GameStateManager({
 }) {
   const [gameState, setGameState] = useState(GAME_STATES.LANDING);
   const [lastEarnedRewards, setLastEarnedRewards] = useState(null);
+  const { items, addItem } = useInventory();
+
+const [inventoryOpen, setInventoryOpen] = useState(false);
+const totalItemCount = items.reduce(
+  (total, item) => total + item.quantity,
+  0
+);
 
   const currentChallenge = QuestManager.getActiveChallenge(progress.currentChallengeId);
   const isChallengeCompleted = progress.completedIds.includes(currentChallenge.id);
@@ -51,10 +60,13 @@ export default function GameStateManager({
   }, []);
 
   const handleChallengeSuccess = useCallback((challengeId, rewards, nextId) => {
-    completeChallenge(challengeId, rewards, nextId);
-    setLastEarnedRewards(rewards);
-    setGameState(GAME_STATES.REWARD);
-  }, [completeChallenge]);
+  if (rewards?.item) {
+    addItem(rewards.item);
+  }
+  completeChallenge(challengeId, rewards, nextId);
+  setLastEarnedRewards(rewards);
+  setGameState(GAME_STATES.REWARD);
+}, [completeChallenge, addItem]);
 
   const handleRewardClaimed = useCallback(() => {
     setGameState(GAME_STATES.DIALOGUE);
@@ -115,6 +127,32 @@ export default function GameStateManager({
     onClaim={handleRewardClaimed}
 
   />
+
+)}
+{gameState !== GAME_STATES.LANDING &&
+
+ gameState !== GAME_STATES.CHARACTER_SELECTION &&
+  gameState !== GAME_STATES.REWARD &&  (
+
+  <>
+
+    <InventoryButton
+
+      itemCount={totalItemCount}
+
+      onClick={() => setInventoryOpen(true)}
+
+    />
+
+    <InventoryPanel
+
+      isOpen={inventoryOpen}
+
+      onClose={() => setInventoryOpen(false)}
+
+    />
+
+  </>
 
 )}
     </div>
