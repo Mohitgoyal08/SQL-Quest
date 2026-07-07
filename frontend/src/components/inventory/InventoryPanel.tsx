@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useInventory } from '../../inventory/hooks/useInventory';
 import { ItemCategory } from '../../inventory/models/ItemTypes';
+import { InventoryItem } from '../../inventory/models/InventoryItem';
 import { InventoryItemCard } from './InventoryItemCard';
+import { InventoryItemModal } from './InventoryItemModal';
 
 interface InventoryPanelProps {
   isOpen: boolean;
@@ -22,28 +24,31 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({
   const { items } = useInventory();
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
+   const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    if (selectedItem) return;
+    onClose();
+  }
+};
     window.addEventListener('keydown', handleKeyDown);
     // Auto-focus the close button on mount for keyboard accessibility
     closeButtonRef.current?.focus();
 
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, selectedItem]);
 
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      onClose();
-    }
-  };
+  if (selectedItem) return;
+
+  if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+    onClose();
+  }
+};
 
   if (!isOpen) return null;
 
@@ -122,7 +127,11 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({
                     {/* Section Content */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {categoryItems.map((item) => (
-                        <InventoryItemCard key={item.id} item={item} />
+                       <InventoryItemCard
+                             key={item.id}
+                             item={item}
+                             onClick={() => setSelectedItem(item)}
+                        />
                       ))}
                     </div>
                   </section>
@@ -133,13 +142,24 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({
         {/* Footer */}
         <div className="border-t-2 border-[#8c6b3e]/40 pt-4 mt-6 flex justify-end">
           <button
-            onClick={onClose}
+  onClick={() => {
+    if (selectedItem) {
+      setSelectedItem(null);
+      return;
+    }
+    onClose();
+  }}
             className="px-6 py-2.5 bg-[#8c6b3e] hover:bg-[#5c4424] text-[#fdf6e2] font-black text-xs uppercase tracking-widest rounded-xl transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5c4424]"
           >
             Close Satchel
           </button>
         </div>
       </div>
+            <InventoryItemModal
+        isOpen={!!selectedItem}
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 };

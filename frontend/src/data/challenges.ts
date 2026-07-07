@@ -55,7 +55,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
     rewards: {
       xp: 100,
       coins: 25,
-      item: "Beginners_Compass"
+      item: "beginners_compass"
     },
     nextChallengeId: "chal_02"
   },
@@ -110,7 +110,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
     rewards: {
       xp: 150,
       coins: 45,
-      badge: "Coin_Counter"
+      badge: "coin_counter"
     },
     nextChallengeId: "chal_04"
   },
@@ -166,7 +166,7 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       coins: 100,
       gems: 25,
       badge: "Fleet Master",
-      item: "Spyglass_truth"
+      item: "spyglass_truth"
     },
     nextChallengeId: null
   }
@@ -198,3 +198,33 @@ export interface SQLChallenge {
   };
   nextChallengeId: string | null;
 }
+// ===== Sprint 9.7 Patch START =====
+export interface SQLChallenge {
+  id: string;
+  chapter: number;
+  islandId: string;
+  npcId: string;
+  title: string;
+  story: string;
+  description: string;
+  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
+  starterCode: string;
+  referenceQuery: string;
+  loadingMessage?: string;
+  requiredItem?: string; // <-- Added for future gated progression
+  validation?: {
+    type: string;
+    expected?: string;
+    pattern?: string;
+  };
+  hints: string[];
+  rewards: {
+    xp: number;
+    coins: number;
+    gems?: number;
+    item?: string;
+    badge?: string;
+  };
+  nextChallengeId: string | null;
+}
+// ===== Sprint 9.7 Patch END =====

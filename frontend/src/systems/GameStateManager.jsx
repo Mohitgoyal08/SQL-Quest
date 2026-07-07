@@ -60,14 +60,19 @@ const totalItemCount = items.reduce(
   }, []);
 
   const handleChallengeSuccess = useCallback((challengeId, rewards, nextId) => {
+
+  console.log("MISSION REWARDS:", rewards);
+
   if (rewards?.item) {
+    console.log("ADDING ITEM:", rewards.item);
     addItem(rewards.item);
   }
+
   completeChallenge(challengeId, rewards, nextId);
   setLastEarnedRewards(rewards);
   setGameState(GAME_STATES.REWARD);
-}, [completeChallenge, addItem]);
 
+}, [completeChallenge, addItem]);
   const handleRewardClaimed = useCallback(() => {
     setGameState(GAME_STATES.DIALOGUE);
   }, []);
