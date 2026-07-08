@@ -79,5 +79,31 @@ export const ITEM_CATALOG: Record<string, Omit<InventoryItem, 'quantity'>> = {
   usable: true,
   tradable: false,
   questItem: false
-}
+},
+  mermaid_token: {
+    id: 'mermaid_token',
+    name: 'Mermaid Token',
+    description: 'A glowing token carved from green sea-glass. Unlocks a sea-green cosmetic paint for your sloop.',
+    icon: '🟢',
+    category: ItemCategory.COSMETIC,
+    rarity: ItemRarity.EPIC,
+    stackable: false,
+    maxStack: 1,
+    usable: true,
+    tradable: false,
+    questItem: false
+  },
+  rum_rations: {
+    id: 'rum_rations',
+    name: 'Rum Rations',
+    description: 'A barrel of premium dark rum to boost crew spirits during long voyages.',
+    icon: '🥃',
+    category: ItemCategory.CONSUMABLE,
+    rarity: ItemRarity.COMMON,
+    stackable: true,
+    maxStack: 99,
+    usable: true,
+    tradable: true,
+    questItem: false
+  }
 };

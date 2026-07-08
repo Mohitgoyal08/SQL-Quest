@@ -7,7 +7,10 @@ export default function HUD({
   coins = 0, 
   gems = 0, 
   currentIsland = 'Tutorial Harbor', 
-  currentNPC = 'Captain Blackbeard' 
+  currentNPC = 'Captain Blackbeard',
+  hasSeaChart = false,
+  onMapOpen,
+  activeShipName = null
 }) {
   return (
     <header className="relative z-20 bg-[#fdf6e2] border-b-4 border-[#8c6b3e] px-4 md:px-6 py-2.5 flex flex-col sm:flex-row items-center justify-between shadow-md select-none font-sans gap-2">
@@ -20,7 +23,7 @@ export default function HUD({
               {playerName}
             </h1>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#8c6b3e] block mt-0.5">
-              📍 {currentIsland} | 💬 {currentNPC}
+              {activeShipName ? '⛵' : '📍'} {currentIsland} {activeShipName ? `(Sloop: ${activeShipName})` : ''} | 💬 {currentNPC}
             </span>
           </div>
         </div>
@@ -29,8 +32,13 @@ export default function HUD({
         <div className="flex items-center gap-1.5 ml-2">
           <button 
             type="button" 
-            title="Map (Coming Soon)" 
-            className="px-2 py-1 bg-[#ebd9b4] hover:bg-[#dfcb9f] border border-[#8c6b3e]/60 rounded text-xs font-bold text-[#5c4424] cursor-not-allowed opacity-60"
+            title={hasSeaChart ? "Open Sea Chart" : "Map (Unlocks via story progression)"} 
+            onClick={hasSeaChart ? onMapOpen : undefined}
+            className={`px-2 py-1 bg-[#ebd9b4] border border-[#8c6b3e]/60 rounded text-xs font-bold text-[#5c4424] transition-colors ${
+              hasSeaChart 
+                ? 'hover:bg-[#dfcb9f] cursor-pointer opacity-100' 
+                : 'cursor-not-allowed opacity-60'
+            }`}
           >
             🗺️ Map
           </button>

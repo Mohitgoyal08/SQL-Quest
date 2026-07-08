@@ -1,7 +1,7 @@
 import React from 'react';
 import HUD from './HUD';
 
-export default function MainGameLayout({ children, playerProfile, progress, worldState }) {
+export default function MainGameLayout({ children, playerProfile, progress, worldState, hasSeaChart, onMapOpen }) {
   return (
     <div className="relative w-screen h-screen bg-slate-950 flex flex-col justify-between overflow-hidden select-none font-sans">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b1d28] via-[#07141d] to-[#040c12] opacity-95 z-0 pointer-events-none" />
@@ -15,6 +15,9 @@ export default function MainGameLayout({ children, playerProfile, progress, worl
         gems={progress?.gems || 0}
         currentIsland={worldState?.currentIsland || 'Tutorial Harbor'}
         currentNPC={worldState?.currentNPC || 'Captain Blackbeard'}
+        hasSeaChart={hasSeaChart}
+        onMapOpen={onMapOpen}
+        activeShipName={progress?.fleet?.activeShipId && progress?.fleet?.ships?.[progress.fleet.activeShipId] ? progress.fleet.ships[progress.fleet.activeShipId].name : null}
       />
 
       <main className="relative z-10 flex-1 flex flex-col overflow-hidden">

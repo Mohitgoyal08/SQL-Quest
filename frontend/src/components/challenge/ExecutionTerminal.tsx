@@ -6,7 +6,7 @@ interface ExecutionTerminalProps {
   queryResult: any;
   loadingMessage?: string;
 
-};
+}
 
 export default function ExecutionTerminal({ isExecuting,queryResult,
 loadingMessage,

@@ -194,100 +194,88 @@ export const SQL_CHALLENGES: SQLChallenge[] = [
       badge: "Fleet Master",
       item: "spyglass_truth"
     },
+    nextChallengeId: "chal_06"
+  },
+
+  {
+    id: "chal_06",
+    title: "Claiming the Abandoned Sloop",
+    chapter: 1,
+    islandId: "tutorial_island",
+    npcId: "captain_blackbeard",
+    story: "Old Barnaby has verified that the registry ledger holds the records of all ships in port. Seek out the vessel registered as 'abandoned' with a price of 0.",
+    description: "Retrieve all columns from the ships table where the status is 'abandoned' and the price is 0.",
+    difficulty: "Intermediate",
+    validation: {
+      type: 'EXACT',
+      expected: "SELECT * FROM ships WHERE status = 'abandoned' AND price = 0"
+    },
+    starterCode: "SELECT * FROM ",
+    referenceQuery: "SELECT * FROM ships WHERE status = 'abandoned' AND price = 0;",
+    hints: [
+      "Select all columns from the 'ships' table.",
+      "Use the WHERE clause to specify status = 'abandoned' and price = 0."
+    ],
+    rewards: {
+      xp: 300,
+      coins: 150,
+      gems: 10
+    },
+    nextChallengeId: "merchant_01"
+  },
+
+  {
+    id: "merchant_01",
+    title: "Auditing the Cargo Ledger",
+    chapter: 2,
+    islandId: "merchant_isles",
+    npcId: "merchant_marlowe",
+    story: "Master Marlowe needs the cargo manifest sorted by worker salaries so he can identify the top spenders.",
+    description: "Retrieve all columns from the employees table ordered by salary from highest to lowest (descending).",
+    difficulty: "Intermediate",
+    validation: {
+      type: 'EXACT',
+      expected: "SELECT * FROM employees ORDER BY salary DESC"
+    },
+    starterCode: "SELECT * FROM employees\nORDER BY ",
+    referenceQuery: "SELECT * FROM employees ORDER BY salary DESC;",
+    hints: [
+      "Use the ORDER BY clause followed by the column name 'salary'.",
+      "Specify DESC at the end to sort in descending order."
+    ],
+    rewards: {
+      xp: 200,
+      coins: 75,
+      gems: 5
+    },
+    nextChallengeId: "merchant_02"
+  },
+
+  {
+    id: "merchant_02",
+    title: "The Elite Traders",
+    chapter: 2,
+    islandId: "merchant_isles",
+    npcId: "merchant_marlowe",
+    story: "Identify only the top 3 highest-earning workers to file Marlowe's trade audit.",
+    description: "Retrieve the top 3 highest-earning employees from the employees table.",
+    difficulty: "Advanced",
+    validation: {
+      type: 'REGEX',
+      expected: "^select\\s+\\*\\s+from\\s+employees\\s+order\\s+by\\s+salary\\s+desc\\s+limit\\s+3$"
+    },
+    starterCode: "SELECT * FROM employees\nORDER BY salary DESC\nLIMIT ",
+    referenceQuery: "SELECT * FROM employees ORDER BY salary DESC LIMIT 3;",
+    hints: [
+      "Combine ORDER BY salary DESC with the LIMIT keyword.",
+      "Specify 3 right after LIMIT."
+    ],
+    rewards: {
+      xp: 250,
+      coins: 100,
+      gems: 10,
+      badge: "Master Merchant"
+    },
     nextChallengeId: null
   }
 ];
-export interface SQLChallenge {
-  id: string;
-  chapter: number;
-  islandId: string;
-  npcId: string;
-  title: string;
-  story: string;
-  description: string;
-  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
-  starterCode: string;
-  referenceQuery: string;
-  loadingMessage?: string; // <-- Added optional property cleanly
-  validation?: {
-    type: string;
-    expected?: string;
-    pattern?: string;
-  };
-  hints: string[];
-  rewards: {
-    xp: number;
-    coins: number;
-    gems?: number;
-    item?: string;
-    badge?: string;
-  };
-  nextChallengeId: string | null;
-}
-// ===== Sprint 9.7 Patch START =====
-export interface SQLChallenge {
-  id: string;
-  chapter: number;
-  islandId: string;
-  npcId: string;
-  title: string;
-  story: string;
-  description: string;
-  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
-  starterCode: string;
-  referenceQuery: string;
-  loadingMessage?: string;
-  requiredItem?: string; // <-- Added for future gated progression
-  validation?: {
-    type: string;
-    expected?: string;
-    pattern?: string;
-  };
-  hints: string[];
-  rewards: {
-    xp: number;
-    coins: number;
-    gems?: number;
-    item?: string;
-    badge?: string;
-  };
-  nextChallengeId: string | null;
-}
-// ===== Sprint 9.7 Patch END =====
-export interface SQLChallenge {
-  id: string;
-  chapter: number;
-  islandId: string;
-  npcId: string;
-  title: string;
-  story: string;
-  description: string;
-  difficulty: 'Novice' | 'Intermediate' | 'Advanced';
-  starterCode: string;
-  referenceQuery: string;
-  loadingMessage?: string;
-  
-  /** 
-   * @deprecated Legacy compatibility field from Sprint 9.7. 
-   * Use the unified `requirements` object for all new content. 
-   */
-  requiredItem?: string;
-  
-  requirements?: WorldRequirement; // Canonical API going forward
-  
-  validation?: {
-    type: string;
-    expected?: string;
-    pattern?: string;
-  };
-  hints: string[];
-  rewards: {
-    xp: number;
-    coins: number;
-    gems?: number;
-    item?: string;
-    badge?: string;
-  };
-  nextChallengeId: string | null;
-}
-// ===== Sprint 9.8 Patch END =====

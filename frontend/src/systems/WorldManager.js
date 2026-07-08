@@ -68,6 +68,13 @@ export class WorldManager {
     if (!requirements) return true;
 
     if (
+      requirements.requiresShip &&
+      !progress?.unlocks?.ship
+    ) {
+      return false;
+    }
+
+    if (
       requirements.requiredItem &&
       !progress?.inventory?.includes(requirements.requiredItem)
     ) {

@@ -23,6 +23,13 @@ export const HARBOR_SCHEMA = {
       department_id INTEGER,
       island TEXT DEFAULT 'Tutorial Harbor',
       FOREIGN KEY (department_id) REFERENCES departments(id)
+    );`,
+    `CREATE TABLE IF NOT EXISTS ships (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL,
+      price INTEGER NOT NULL
     );`
   ],
 
@@ -44,6 +51,12 @@ export const HARBOR_SCHEMA = {
       (105, 'Calico Jack', 'Navigator', 58000, 1, 'Smuggler Cove'),
       (106, 'Mary Read', 'Cannoneer', 51000, 2, 'Tutorial Harbor'),
       (107, 'Israel Hands', 'Boatswain', 48000, 3, 'Tutorial Harbor'),
-      (108, 'Bartholomew Roberts', 'Tactician', 82000, 1, 'Smuggler Cove');`
+      (108, 'Bartholomew Roberts', 'Tactician', 82000, 1, 'Smuggler Cove');`,
+
+    // Populate Ships (Vessels in the Harbor)
+    `INSERT INTO ships (id, name, type, status, price) VALUES 
+      ('sloop_01', 'The SELECT Sloop', 'Sloop', 'abandoned', 0),
+      ('galleon_01', 'Morgans Revenge', 'Galleon', 'active', 50000),
+      ('brigantine_01', 'Plunder Wind', 'Brigantine', 'active', 20000);`
   ]
 };

@@ -2,6 +2,7 @@ import { TUTORIAL_DIALOGUES } from '../dialogue/tutorialHarbor/dialogues';
 import { SMUGGLERS_DIALOGUES } from '../dialogue/smugglersCove/dialogues';
 import { JUNGLE_DIALOGUES } from '../dialogue/jungleOfQueries/dialogues';
 import { CRYSTAL_DIALOGUES } from '../dialogue/crystalCaverns/dialogues';
+import { MERCHANT_DIALOGUES } from '../dialogue/merchantIsles/dialogues';
 
 /**
  * Master dictionary aggregating all island dialogue registries.
@@ -12,6 +13,7 @@ const MASTER_DIALOGUE_REGISTRY = {
   ...SMUGGLERS_DIALOGUES,
   ...JUNGLE_DIALOGUES,
   ...CRYSTAL_DIALOGUES,
+  ...MERCHANT_DIALOGUES,
 };
 
 export class DialogueRepository {

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SQL_CHALLENGES, ChallengeRewards } from '../data/challenges';
+import { getStorageKey } from '../dev/DevStorage';
 
-const STORAGE_KEY = 'sql_quest_player_save_v2';
+const STORAGE_KEY = getStorageKey('save', 'sql_quest_player_save_v2');
 
 export interface PlayerProgressState {
   level: number;
@@ -15,6 +16,22 @@ export interface PlayerProgressState {
   completedIds: string[];
   unlockedIds: string[];
   currentChallengeId: string;
+  unlocks: {
+    seaChart: boolean;
+    seaChartSeen: boolean;
+    ship: boolean;
+    merchantIslesVoyaged: boolean;
+    [key: string]: boolean;
+  };
+  fleet: {
+    activeShipId: string | null;
+    ownedShipIds: string[];
+    ships: Record<string, {
+      name: string;
+      stats: { speed: number; capacity: number };
+      cosmetics: { activeSkin: string };
+    }>;
+  };
 }
 
 const INITIAL_STATE: PlayerProgressState = {
@@ -29,13 +46,33 @@ const INITIAL_STATE: PlayerProgressState = {
   completedIds: [],
   unlockedIds: [SQL_CHALLENGES[0].id],
   currentChallengeId: SQL_CHALLENGES[0].id,
+  unlocks: {
+    seaChart: false,
+    seaChartSeen: false,
+    ship: false,
+    merchantIslesVoyaged: false,
+  },
+  fleet: {
+    activeShipId: null,
+    ownedShipIds: [],
+    ships: {},
+  },
 };
 
 export function useChallengeProgress() {
   const [progress, setProgress] = useState<PlayerProgressState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return { ...INITIAL_STATE, ...JSON.parse(saved) };
+      if (saved) {
+        const loaded = JSON.parse(saved);
+        if (!loaded.fleet) {
+          loaded.fleet = INITIAL_STATE.fleet;
+        }
+        if (!loaded.unlocks) {
+          loaded.unlocks = INITIAL_STATE.unlocks;
+        }
+        return { ...INITIAL_STATE, ...loaded };
+      }
     } catch (e) {
       console.error("Failed to parse save state:", e);
     }
@@ -74,6 +111,29 @@ export function useChallengeProgress() {
       // Advance location/NPC if moving to a new challenge
       const nextChallengeMeta = SQL_CHALLENGES.find(c => c.id === (nextId || challengeId));
 
+      const nextUnlocks = { ...prev.unlocks };
+      const nextFleet = { ...prev.fleet };
+
+      if (challengeId === 'chal_01') {
+        nextUnlocks.seaChart = true;
+      }
+
+      if (challengeId === 'chal_06') {
+        nextUnlocks.ship = true;
+        nextFleet.activeShipId = 'sloop_abandoned';
+        if (!nextFleet.ownedShipIds.includes('sloop_abandoned')) {
+          nextFleet.ownedShipIds.push('sloop_abandoned');
+        }
+        nextFleet.ships = {
+          ...nextFleet.ships,
+          sloop_abandoned: {
+            name: 'The Weathered Sloop',
+            stats: { speed: 1.0, capacity: 10 },
+            cosmetics: { activeSkin: 'default' }
+          }
+        };
+      }
+
       return {
         ...prev,
         level: newLevel,
@@ -87,6 +147,8 @@ export function useChallengeProgress() {
         completedIds: nextCompleted,
         unlockedIds: nextUnlocked,
         currentChallengeId: nextId || challengeId,
+        unlocks: nextUnlocks,
+        fleet: nextFleet,
       };
     });
   }, []);
@@ -104,5 +166,48 @@ export function useChallengeProgress() {
     });
   }, []);
 
-  return { progress, completeChallenge, selectChallenge };
+  const updateUnlock = useCallback((featureKey: string, value: boolean) => {
+    setProgress((prev) => ({
+      ...prev,
+      unlocks: {
+        ...prev.unlocks,
+        [featureKey]: value,
+      },
+    }));
+  }, []);
+
+  const renameShip = useCallback((shipId: string, name: string) => {
+    setProgress((prev) => {
+      const ships = { ...prev.fleet.ships };
+      if (ships[shipId]) {
+        ships[shipId] = {
+          ...ships[shipId],
+          name: name,
+        };
+      }
+      return {
+        ...prev,
+        fleet: {
+          ...prev.fleet,
+          ships,
+        },
+      };
+    });
+  }, []);
+
+  const adjustCoins = useCallback((amount: number) => {
+    setProgress((prev) => ({
+      ...prev,
+      coins: Math.max(0, prev.coins + amount),
+    }));
+  }, []);
+
+  const devApplyState = useCallback((stateUpdates: Partial<typeof progress>) => {
+    setProgress((prev) => ({
+      ...prev,
+      ...stateUpdates,
+    }));
+  }, []);
+
+  return { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState };
 }

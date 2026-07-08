@@ -1,4 +1,6 @@
-const PROFILE_STORAGE_KEY = 'sql_quest_player_profile';
+import { getStorageKey } from '../dev/DevStorage';
+
+const PROFILE_STORAGE_KEY = getStorageKey('profile', 'sql_quest_player_profile');
 
 export class PlayerProfileService {
   static loadProfile() {
