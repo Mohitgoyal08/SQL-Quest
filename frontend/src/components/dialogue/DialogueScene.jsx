@@ -46,10 +46,6 @@ export default function DialogueScene({ dialogue = [], onComplete }) {
     finishTypingRef.current = fn;
   }, []);
 
-  if (!dialogue || dialogue.length === 0 || !currentDialogue) {
-    return null;
-  }
-
   const handleInteraction = useCallback(() => {
     if (!isTypingFinishedRef.current) {
       if (typeof finishTypingRef.current === 'function') {
@@ -74,6 +70,10 @@ export default function DialogueScene({ dialogue = [], onComplete }) {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleInteraction]);
+
+  if (!dialogue || dialogue.length === 0 || !currentDialogue) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">

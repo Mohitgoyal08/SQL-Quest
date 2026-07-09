@@ -4,6 +4,7 @@ import { DatabaseBootstrap } from '../../database/DatabaseBootstrap';
 import { SQLEngineService } from '../../engine/SQLEngineService';
 import { ResultValidator } from '../../engine/ResultValidator';
 import { analyzeSQLMistakes } from '../../utils/hintEngine';
+import { AudioService } from '../../services/AudioService';
 // ===== Sprint 9.3 START =====
 import ExecutionTerminal from './ExecutionTerminal';
 const MIN_EXECUTION_DELAY_MS = 600;
@@ -38,18 +39,17 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
   // ===== Sprint 9.3 END =====
 
   // Synchronize state and boot WASM database when switching challenges
-  // ===== Sprint 9.3 Regression Fix START =====
-  // Proper timer cleanup to avoid memory leaks during staged success animations
+  // Staged Success Animations & Auto-Advance
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     if (status === 'SUCCESS') {
       if (successStep === 1) {
+        AudioService.playSuccess();
         timer = setTimeout(() => setSuccessStep(2), 400);
       } else if (successStep === 2) {
         timer = setTimeout(() => setSuccessStep(3), 400);
       } else if (successStep === 3) {
-        // Automatically trigger original completion card & dialogue loop
         timer = setTimeout(() => {
           onSuccess(challenge.id, challenge.rewards, challenge.nextChallengeId);
         }, AUTO_ADVANCE_DELAY_MS);
@@ -60,26 +60,9 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
       if (timer) clearTimeout(timer);
     };
   }, [status, successStep, challenge, onSuccess]);
-  // ===== Sprint 9.3 Regression Fix END =====
-  // ===== Sprint 9.3 START =====
-  // Proper timer cleanup to avoid memory leaks during staged success animations
-  useEffect(() => {
-    let timer1: NodeJS.Timeout;
-    let timer2: NodeJS.Timeout;
-
-    if (status === 'SUCCESS' && successStep === 1) {
-      timer1 = setTimeout(() => setSuccessStep(2), 400);
-      timer2 = setTimeout(() => setSuccessStep(3), 800);
-    }
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [status, successStep]);
-  // ===== Sprint 9.3 END =====
 
   const handleRunQuery = async () => {
+    AudioService.playClick();
     // ===== Sprint 9.3 START =====
     if (isExecuting) return; // Prevent multiple clicks
     // ===== Sprint 9.3 END =====

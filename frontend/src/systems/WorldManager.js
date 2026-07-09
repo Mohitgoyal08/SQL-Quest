@@ -19,6 +19,20 @@ export class WorldManager {
   }
 
   /**
+   * Evaluates if the player has completed their current island and should be at Sea.
+   */
+  static isBetweenIslands(progress) {
+    if (!progress.unlocks?.ship) return false;
+    const activeChallenge = SQL_CHALLENGES.find(c => c.id === progress.currentChallengeId) || SQL_CHALLENGES[0];
+    
+    // Find the last challenge of the current island
+    const islandChallenges = SQL_CHALLENGES.filter(c => c.islandId === activeChallenge.islandId);
+    const lastChallenge = islandChallenges[islandChallenges.length - 1];
+    
+    return progress.completedIds.includes(lastChallenge.id);
+  }
+
+  /**
    * Evaluates if an island is accessible.
    */
   static isIslandAccessible(

@@ -1,27 +1,18 @@
 import { test, expect } from '@playwright/test';
-import { resetProfile, loadPreset, openShop } from './helpers';
+import { resetProfile, loadPreset } from './helpers';
 
-test.describe('Merchant Isles Economy Spec', () => {
+test.describe('Merchant Isles Flow Spec', () => {
   test.beforeEach(async ({ page }) => {
     await resetProfile(page);
   });
 
-  test('should load Merchant Hub preset, open shop, and test ESC closing', async ({ page }) => {
-    // Load Merchant Hub preset directly (spawns on Merchant Isles with coins and ship)
+  test('should load Merchant Hub preset and enter linear island flow', async ({ page }) => {
     await loadPreset(page, 'Merchant Hub');
     
-    // We should be in Town Hub with Quincy's Cargo Exchange visible
-    await expect(page.locator('text=Quincy\'s Cargo Exchange')).toBeVisible();
-    
-    // Open Shop
-    await openShop(page);
-    
-    // Shop modal should appear
-    const shopModal = page.locator('h2:has-text("Quincy\'s Cargo Exchange")');
-    await expect(shopModal).toBeVisible();
-    
-    // Press Escape to close shop modal
-    await page.keyboard.press('Escape');
-    await expect(shopModal).not.toBeVisible();
+    // We should be in IslandFlow Orchestrator starting with Title Card (if not arrival)
+    // Wait for the story event or dialogue
+    const dialogBox = page.locator('.fixed.inset-0.z-50');
+    await expect(dialogBox).toBeVisible({ timeout: 10000 });
   });
 });
+

@@ -29,7 +29,7 @@ const ISLANDS_MANIFEST = [
     y: '25%',
     icon: '☠️',
     description: 'A treacherous hiding place for high earners and sorted manifests.',
-    requirements: { requiredChallengeId: 'chal_99' },
+    requirements: { requiredChallengeId: 'merchant_02' },
   },
   {
     id: 'jungle_queries',
@@ -38,7 +38,7 @@ const ISLANDS_MANIFEST = [
     y: '65%',
     icon: '🌴',
     description: 'Dense forests where advanced aggregations and nested joins lie buried.',
-    requirements: { requiredChallengeId: 'chal_99' },
+    requirements: { requiredChallengeId: 'smugglers_03' },
   },
   {
     id: 'crystal_caverns',
@@ -47,11 +47,11 @@ const ISLANDS_MANIFEST = [
     y: '70%',
     icon: '🔮',
     description: 'Shimmering caves hiding complex relational structures and subqueries.',
-    requirements: { requiredChallengeId: 'chal_99' },
+    requirements: { requiredChallengeId: 'smugglers_03' },
   }
 ];
 
-export default function SeaChartModal({ onClose, progress, onTravelTo }) {
+export default function SeaChartModal({ onClose, progress }) {
   const [selectedLockedIsland, setSelectedLockedIsland] = useState(null);
 
   // Close map on Escape key press
@@ -78,9 +78,7 @@ export default function SeaChartModal({ onClose, progress, onTravelTo }) {
     }
 
     if (isUnlocked) {
-      if (typeof onTravelTo === 'function') {
-        onTravelTo(island.id);
-      }
+      // Sea Chart is now purely a reference map. It does not start voyages.
       return;
     }
     // Set the selected locked island to trigger the custom parchment warning card
@@ -97,10 +95,10 @@ export default function SeaChartModal({ onClose, progress, onTravelTo }) {
         initial={{ scale: 0.95, y: 15, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         exit={{ scale: 0.95, y: 15, opacity: 0 }}
-        className="relative w-full max-w-4xl h-[75vh] min-h-[500px] bg-[#fdf6e2] border-8 border-double border-[#8c6b3e] rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col overflow-hidden"
+        className="relative w-full max-w-4xl h-[75vh] min-h-[500px] bg-[#fdf6e2] border-8 border-double border-[#8c6b3e] rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col overflow-hidden filter sepia-[0.2]"
         style={{
           backgroundImage: 'radial-gradient(circle, #fdf6e2 60%, #ebd9b4 100%)',
-          boxShadow: 'inset 0 0 50px rgba(92,68,36,0.25), 0 25px 50px rgba(0,0,0,0.6)',
+          boxShadow: 'inset 0 0 50px rgba(92,68,36,0.35), 0 25px 50px rgba(0,0,0,0.8)',
         }}
         onClick={(e) => e.stopPropagation()} // Prevent close on modal body click
       >
@@ -127,12 +125,31 @@ export default function SeaChartModal({ onClose, progress, onTravelTo }) {
         {/* Map Grid / Visualization */}
         <div className="relative flex-1 bg-[#ebd9b4]/30 border-2 border-dashed border-[#8c6b3e]/50 rounded-xl overflow-hidden shadow-inner">
           {/* Subtle grid pattern background */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(140,107,62,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(140,107,62,0.05)_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(140,107,62,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(140,107,62,0.1)_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
 
-          {/* Compass visual */}
-          <div className="absolute right-6 bottom-6 opacity-25 text-8xl pointer-events-none select-none">
+          {/* Animated Route Lines (Phase 6) */}
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none z-0">
+            <motion.path 
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 4, ease: "easeInOut" }}
+              d="M 20 50 Q 30 40 45 30 Q 60 20 75 25" 
+              fill="none" 
+              stroke="#8c6b3e" 
+              strokeWidth="3" 
+              strokeDasharray="8 8" 
+              opacity="0.6"
+            />
+          </svg>
+
+          {/* Compass visual (Phase 6) */}
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
+            className="absolute right-6 bottom-6 opacity-30 text-8xl pointer-events-none select-none filter drop-shadow-md"
+          >
             🧭
-          </div>
+          </motion.div>
 
           {/* Islands rendering */}
           {ISLANDS_MANIFEST.map((island) => {
@@ -142,11 +159,20 @@ export default function SeaChartModal({ onClose, progress, onTravelTo }) {
             const isUnlocked = WorldManager.checkRequirements(island.requirements, progress);
             
             return (
-              <div
+              <motion.div
                 key={island.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ repeat: Infinity, duration: 3 + Math.random() * 2, ease: "easeInOut" }}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10"
                 style={{ left: island.x, top: island.y }}
               >
+                {/* Dynamic Drop Shadow for depth (Phase 7) */}
+                <motion.div 
+                  animate={{ scale: [1, 0.8, 1], opacity: [0.4, 0.2, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 3 + Math.random() * 2, ease: "easeInOut" }}
+                  className="absolute -bottom-2 w-10 h-2 bg-black/40 rounded-[100%] blur-sm pointer-events-none"
+                />
+                
                 {/* Island Button / Icon container */}
                 <button
                   onClick={() => handleIslandClick(island)}
@@ -186,7 +212,7 @@ export default function SeaChartModal({ onClose, progress, onTravelTo }) {
                 }`}>
                   {island.name}
                 </span>
-              </div>
+              </motion.div>
             );
           })}
 

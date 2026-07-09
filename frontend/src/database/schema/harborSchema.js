@@ -3,9 +3,9 @@
  * Designed with foreign keys to seamlessly support future INNER JOIN / LEFT JOIN challenges.
  */
 export const HARBOR_SCHEMA = {
-  id: 'harbor_dataset_v1',
-  name: 'Tutorial Harbor & Smuggler Cove Ledger',
-  description: 'Core pirate manifest and departmental assignment registry.',
+  id: 'world_dataset_v1',
+  name: 'SQL Quest World Database',
+  description: 'Unified dataset for all 8 islands.',
   
   // DDL (Data Definition Language) - Schema Creation
   ddl: [
@@ -30,6 +30,29 @@ export const HARBOR_SCHEMA = {
       type TEXT NOT NULL,
       status TEXT NOT NULL,
       price INTEGER NOT NULL
+    );`,
+    `CREATE TABLE IF NOT EXISTS artifacts (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      danger_level INTEGER NOT NULL
+    );`,
+    `CREATE TABLE IF NOT EXISTS gems (
+      id INTEGER PRIMARY KEY,
+      miner_name TEXT NOT NULL,
+      gem_type TEXT NOT NULL,
+      weight INTEGER NOT NULL
+    );`,
+    `CREATE TABLE IF NOT EXISTS weather_logs (
+      id INTEGER PRIMARY KEY,
+      region TEXT NOT NULL,
+      fog_density INTEGER NOT NULL,
+      sea_monster TEXT
+    );`,
+    `CREATE TABLE IF NOT EXISTS bounties (
+      id INTEGER PRIMARY KEY,
+      target_name TEXT NOT NULL,
+      bounty_amount INTEGER NOT NULL
     );`
   ],
 
@@ -57,6 +80,40 @@ export const HARBOR_SCHEMA = {
     `INSERT INTO ships (id, name, type, status, price) VALUES 
       ('sloop_01', 'The SELECT Sloop', 'Sloop', 'abandoned', 0),
       ('galleon_01', 'Morgans Revenge', 'Galleon', 'active', 50000),
-      ('brigantine_01', 'Plunder Wind', 'Brigantine', 'active', 20000);`
+      ('brigantine_01', 'Plunder Wind', 'Brigantine', 'active', 20000),
+      ('galleon_02', 'The Sea Queen', 'Galleon', 'contraband', 85000),
+      ('schooner_01', 'Silent Whisper', 'Schooner', 'contraband', 42000);`,
+
+    // Populate Artifacts (Jungle of Queries)
+    `INSERT INTO artifacts (id, name, type, danger_level) VALUES
+      (1, 'Golden Idol', 'treasure', 5),
+      (2, 'Cursed Amulet', 'relic', 9),
+      (3, 'Ancient Tablet', 'relic', 2),
+      (4, 'Jade Monkey', 'treasure', 4),
+      (5, 'Poison Dart', 'weapon', 7);`,
+
+    // Populate Gems (Crystal Caverns)
+    `INSERT INTO gems (id, miner_name, gem_type, weight) VALUES
+      (1, 'Gimli', 'Ruby', 15),
+      (2, 'Balin', 'Sapphire', 12),
+      (3, 'Gimli', 'Emerald', 8),
+      (4, 'Thorin', 'Diamond', 25),
+      (5, 'Balin', 'Ruby', 10),
+      (6, 'Dori', 'Sapphire', 18);`,
+
+    // Populate Weather Logs (Lost Sea)
+    `INSERT INTO weather_logs (id, region, fog_density, sea_monster) VALUES
+      (1, 'North Quadrant', 80, 'Kraken'),
+      (2, 'South Quadrant', 20, NULL),
+      (3, 'East Quadrant', 95, 'Leviathan'),
+      (4, 'West Quadrant', 40, NULL),
+      (5, 'Center Maelstrom', 100, 'Sirens');`,
+
+    // Populate Bounties (Pirate King's Ship)
+    `INSERT INTO bounties (id, target_name, bounty_amount) VALUES
+      (1, 'Captain Blackbeard', 100000),
+      (2, 'Anne Bonny', 75000),
+      (3, 'Calico Jack', 60000),
+      (4, 'Mary Read', 55000);`
   ]
 };

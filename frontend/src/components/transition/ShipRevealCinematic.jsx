@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AudioService } from '../../services/AudioService';
 
 export default function ShipRevealCinematic({ onComplete }) {
   const [step, setStep] = useState(1); // Steps: 1: Promotion, 2: Dialogue, 3: Naming, 4: Reveal
   const [shipName, setShipName] = useState('');
 
+  useEffect(() => {
+    AudioService.playSuccess();
+  }, []);
+
   const handleConfirmName = (e) => {
     e.preventDefault();
+    AudioService.playClick();
     if (!shipName.trim()) {
       setShipName('The Query Sloop');
     }
@@ -14,6 +20,7 @@ export default function ShipRevealCinematic({ onComplete }) {
   };
 
   const handleSetSail = () => {
+    AudioService.playClick();
     const finalName = shipName.trim() || 'The Query Sloop';
     onComplete(finalName);
   };
@@ -32,6 +39,13 @@ export default function ShipRevealCinematic({ onComplete }) {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
+            {/* Cinematic light rays behind promotion badge */}
+            <motion.div 
+              animate={{ rotate: 360, opacity: [0.3, 0.6, 0.3] }}
+              transition={{ rotate: { repeat: Infinity, duration: 20, ease: "linear" }, opacity: { repeat: Infinity, duration: 4 } }}
+              className="absolute inset-0 z-0 bg-[conic-gradient(from_0deg,transparent_0deg,rgba(245,158,11,0.2)_45deg,transparent_90deg,rgba(245,158,11,0.2)_135deg,transparent_180deg,rgba(245,158,11,0.2)_225deg,transparent_270deg,rgba(245,158,11,0.2)_315deg,transparent_360deg)] opacity-40 blur-xl pointer-events-none"
+            />
+
             <motion.span
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
@@ -46,7 +60,10 @@ export default function ShipRevealCinematic({ onComplete }) {
               Your deeds at Tutorial Harbor have cleared the docks and earned you a command.
             </p>
             <button
-              onClick={() => setStep(2)}
+              onClick={() => {
+                AudioService.playClick();
+                setStep(2);
+              }}
               className="px-8 py-3.5 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg cursor-pointer"
             >
               Step Forward ➔
@@ -79,7 +96,10 @@ export default function ShipRevealCinematic({ onComplete }) {
               "Take good care of her... she carried legends before you."
             </p>
             <button
-              onClick={() => setStep(3)}
+              onClick={() => {
+                AudioService.playClick();
+                setStep(3);
+              }}
               className="px-6 py-3 bg-[#8c6b3e] hover:bg-[#5c4424] text-[#fdf6e2] font-black text-xs uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
             >
               Claim the Deed
@@ -138,12 +158,31 @@ export default function ShipRevealCinematic({ onComplete }) {
             transition={{ duration: 1.2 }}
             className="flex flex-col items-center max-w-lg w-full text-center"
           >
-            {/* The Ship Paper Unfurl */}
+            {/* Confetti Celebration Layer (Phase 4) */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={`confetti-${i}`}
+                  initial={{ y: -100, x: Math.random() * window.innerWidth, rotate: 0 }}
+                  animate={{ y: window.innerHeight + 100, x: `+=${Math.random() * 200 - 100}`, rotate: 360 }}
+                  transition={{ duration: 3 + Math.random() * 4, delay: Math.random() * 2, repeat: Infinity }}
+                  className={`absolute w-3 h-3 ${['bg-amber-400', 'bg-red-500', 'bg-white', 'bg-blue-400'][i % 4]} shadow-sm`}
+                />
+              ))}
+            </div>
+
+            {/* The Ship Paper Unfurl with Camera Shake */}
             <motion.div
               initial={{ scaleX: 0.1, scaleY: 0.1, rotate: -5 }}
-              animate={{ scaleX: 1, scaleY: 1, rotate: 0 }}
+              animate={{ 
+                scaleX: 1, 
+                scaleY: 1, 
+                rotate: [ -5, 2, -1, 1, 0 ],
+                x: [0, -10, 10, -10, 10, 0], // Camera shake effect
+                y: [0, 5, -5, 5, -5, 0]
+              }}
               transition={{ duration: 1.5, cubicBezier: [0.16, 1, 0.3, 1] }}
-              className="relative w-full aspect-[4/3] bg-[#ebd9b4] border-8 border-double border-[#5c4424] rounded shadow-2xl p-6 flex flex-col items-center justify-center overflow-hidden"
+              className="relative w-full aspect-[4/3] bg-[#ebd9b4] border-8 border-double border-[#5c4424] rounded shadow-2xl p-6 flex flex-col items-center justify-center overflow-hidden z-10"
               style={{
                 backgroundImage: 'radial-gradient(circle, #fdf6e2 40%, #ebd9b4 100%)',
                 boxShadow: 'inset 0 0 45px rgba(92,68,36,0.35), 0 25px 50px rgba(0,0,0,0.6)'

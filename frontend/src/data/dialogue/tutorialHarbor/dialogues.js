@@ -59,7 +59,21 @@ export const TUTORIAL_DIALOGUES = {
       id: "node_2",
       speaker: "Quartermaster Flint",
       avatar: "📜",
-      text: "We need to audit the payroll immediately. Filter the records using a WHERE clause and retrieve every column for hands whose salary is greater than 50,000 gold pieces!",
+      text: "We need to audit the payroll immediately. Retrieve the name and salary columns from the employees table to see who is earning what!",
+    },
+  ],
+  chal_06: [
+    {
+      id: "node_1",
+      speaker: "Captain Blackbeard",
+      avatar: "🏴‍☠️",
+      text: "Old Barnaby has verified that the registry ledger holds the records of all ships in port. But we need a ship of our own if we are to leave this harbor.",
+    },
+    {
+      id: "node_2",
+      speaker: "Captain Blackbeard",
+      avatar: "🏴‍☠️",
+      text: "Retrieve the names and prices of all ships so we can manually review the ledger and find the cheapest abandoned one.",
     },
   ],
 };

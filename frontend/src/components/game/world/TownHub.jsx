@@ -7,6 +7,13 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
   const [selectedNode, setSelectedNode] = useState(null);
   const [seagullsCount, setSeagullsCount] = useState(3);
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [isCinematic, setIsCinematic] = useState(true);
+
+  // Cinematic Arrival Timer
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsCinematic(false), 2500);
+    return () => clearTimeout(timer);
+  }, [islandId]);
 
   if (!config) {
     return (
@@ -17,55 +24,76 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
   }
 
   const handleNodeClick = (node) => {
-    if (node.id === 'quincy') {
-      setSelectedNode({
-        ...node,
-        customAction: {
-          label: 'Browse Cargo Exchange',
-          handler: () => {
-            setSelectedNode(null);
-            onOpenShop();
-          }
-        }
-      });
-      return;
-    }
+    let customActions = [];
+
     if (node.id === 'dockyard') {
       onOpenMap();
       return;
     }
-    if (node.id === 'marlowe') {
-      // Allow speaking or just inspecting
-      setSelectedNode({
-        ...node,
-        customAction: {
-          label: 'Speak (Begin Quest)',
-          handler: () => {
-            setSelectedNode(null);
-            onStartQuest();
-          }
+
+    if (node.type === 'NPC') {
+      customActions.push({
+        label: 'Speak (Begin Quest)',
+        handler: () => {
+          setSelectedNode(null);
+          onStartQuest(node.id);
         }
       });
-      return;
     }
-    
-    // Default detail card popup for buildings/NPCs
+
+    if (node.id === 'quincy') {
+      customActions.unshift({
+        label: 'Browse Cargo Exchange',
+        handler: () => {
+          setSelectedNode(null);
+          onOpenShop();
+        }
+      });
+    }
+
     let text = node.description;
     if (node.id === 'crier') {
       text = `"📢 Extra! Extra! The Merchant Guild Cargo Ledger is locked up tight! Old Barnaby demands a new captain to set sail! Marlowe pulls his hair out in the square!"`;
     }
-    
+
     setSelectedNode({
       ...node,
-      descriptionText: text
+      descriptionText: text,
+      customActions: customActions.length > 0 ? customActions : null
     });
   };
 
   return (
-    <div 
+    <motion.div 
+      initial={{ scale: 1.1, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 2, ease: "easeOut" }}
       className="flex-1 flex flex-col relative overflow-hidden select-none p-4 md:p-6"
       style={config.backgroundStyle}
     >
+      {/* PHASE 10: ISLAND ARRIVAL CINEMATIC OVERLAY */}
+      <AnimatePresence>
+        {isCinematic && (
+          <motion.div 
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950 pointer-events-none"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1 }}
+              className="text-center"
+            >
+              <h1 className="text-4xl md:text-6xl font-serif text-[#fdf6e2] uppercase tracking-[0.2em] drop-shadow-2xl">
+                {config.islandName}
+              </h1>
+              <div className="w-24 h-0.5 bg-[#8c6b3e] mx-auto mt-4" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Decorative Outer Border */}
       <div className="absolute inset-4 border-4 border-double border-[#8c6b3e]/60 rounded-2xl pointer-events-none z-10" />
 
@@ -80,9 +108,26 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
       </div>
 
       {/* Interactive Map Canvas */}
-      <div className="flex-1 relative mt-4 bg-[#ebd9b4]/20 border-2 border-dashed border-[#8c6b3e]/40 rounded-2xl overflow-hidden shadow-inner">
-        {/* Parallax Grid overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(140,107,62,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(140,107,62,0.03)_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
+      <div className="flex-1 relative mt-4 rounded-2xl overflow-hidden shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] border-4 border-slate-800/80">
+        {/* Dynamic Water Base */}
+        <div className="absolute inset-0 bg-[#07131f] pointer-events-none">
+          <motion.div 
+            animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
+            transition={{ repeat: Infinity, duration: 60, ease: "linear" }}
+            className="absolute inset-0 opacity-20"
+            style={{ backgroundImage: 'radial-gradient(circle at center, rgba(140,107,62,0.2) 2px, transparent 2.5px)', backgroundSize: '40px 40px' }}
+          />
+        </div>
+
+        {/* Smuggler's Cove Fog Override (Phase 9) */}
+        {islandId === 'smugglers_cove' && (
+          <motion.div 
+            animate={{ x: [0, -200, 0], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+            className="absolute inset-0 z-20 pointer-events-none mix-blend-screen"
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(100,100,120,0.3) 10%, transparent 50%)', backgroundSize: '300px 300px' }}
+          />
+        )}
 
         {/* Ambient Smoke from Tavern Chimney */}
         <div className="absolute top-[20%] right-[18%] z-10 pointer-events-none">
@@ -129,6 +174,7 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
         {config.nodes.map((node) => {
           const isUnlocked = node.id !== 'warehouse' && node.id !== 'tavern';
           const isHovered = hoveredNode === node.id;
+          const isSelected = selectedNode?.id === node.id;
           
           return (
             <div
@@ -172,7 +218,7 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
                   <div className="absolute inset-0 rounded-full animate-ping border-2 border-amber-500/40 pointer-events-none" />
                 )}
 
-                <span>{node.icon}</span>
+                <span className="relative z-10">{node.icon}</span>
               </button>
             </div>
           );
@@ -215,13 +261,18 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
                 {selectedNode.descriptionText || selectedNode.description}
               </p>
 
-              {selectedNode.customAction ? (
-                <button
-                  onClick={selectedNode.customAction.handler}
-                  className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors cursor-pointer"
-                >
-                  {selectedNode.customAction.label}
-                </button>
+              {selectedNode.customActions ? (
+                <div className="flex flex-col gap-2">
+                  {selectedNode.customActions.map((action, idx) => (
+                    <button
+                      key={idx}
+                      onClick={action.handler}
+                      className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors cursor-pointer"
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
               ) : (
                 <button
                   onClick={() => setSelectedNode(null)}
@@ -234,6 +285,6 @@ export default function TownHub({ islandId, progress, onOpenMap, onStartQuest, o
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

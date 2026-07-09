@@ -70,5 +70,50 @@ export const WORLD_LOCATION_CONFIG = {
         description: 'Quartermaster Quincy manages the harbor warehouse inventory.'
       }
     ]
+  },
+  smugglers_cove: {
+    islandName: "Smuggler's Cove",
+    backgroundStyle: {
+      backgroundImage: 'linear-gradient(to bottom, #2b2b2b, #4a4a4a)',
+      backgroundColor: '#1a1a1a',
+    },
+    nodes: [
+      {
+        id: 'dockyard',
+        name: 'Hidden Dockyard',
+        x: '15%',
+        y: '70%',
+        type: 'PORTAL',
+        icon: '⛵',
+        description: 'Board your sloop and view the Sea Chart.'
+      },
+      {
+        id: 'admiral_morgan',
+        name: 'Admiral Morgan',
+        x: '45%',
+        y: '50%',
+        type: 'NPC',
+        icon: '🎖️',
+        description: 'Admiral Morgan is investigating the smuggler ring.'
+      },
+      {
+        id: 'shady_informant',
+        name: 'Shady Informant',
+        x: '75%',
+        y: '60%',
+        type: 'NPC',
+        icon: '🕵️',
+        description: 'A shadowy figure with information for the right price.'
+      },
+      {
+        id: 'smuggler_boss',
+        name: 'Smuggler Boss',
+        x: '80%',
+        y: '30%',
+        type: 'NPC',
+        icon: '🦹',
+        description: 'The mastermind behind the illegal trade.'
+      }
+    ]
   }
 };

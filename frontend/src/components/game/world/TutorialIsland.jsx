@@ -24,6 +24,28 @@ export default function TutorialIsland({
         !isLocked ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
       }`}
     >
+      {/* 0. AMBIENT WATER BASE */}
+      <motion.div 
+        animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-10 w-4/5 h-1/4 bg-sky-400/20 rounded-[100%] blur-xl pointer-events-none" 
+      />
+      
+      {/* 0.5 AMBIENT BIRDS */}
+      <motion.div 
+        animate={{ x: [-20, 100], y: [0, -10, 0, 10, 0] }}
+        transition={{ x: { repeat: Infinity, duration: 15, ease: "linear" }, y: { repeat: Infinity, duration: 5, ease: "easeInOut" } }}
+        className="absolute top-10 left-10 pointer-events-none opacity-40 z-10"
+      >
+        <span className="text-[10px]">🐦</span>
+      </motion.div>
+      <motion.div 
+        animate={{ x: [-50, 120], y: [10, -5, 5, -10, 0] }}
+        transition={{ x: { repeat: Infinity, duration: 20, ease: "linear", delay: 2 }, y: { repeat: Infinity, duration: 7, ease: "easeInOut" } }}
+        className="absolute top-16 left-0 pointer-events-none opacity-30 z-10"
+      >
+        <span className="text-[8px]">🐦</span>
+      </motion.div>
       {/* 1. FLOATING ISLAND TITLE (Above the island) */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}

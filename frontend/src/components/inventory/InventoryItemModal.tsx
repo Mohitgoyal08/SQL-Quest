@@ -38,7 +38,7 @@ export const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
 
   const handleUseItem = () => {
     if (!item) return;
-    const result = ItemUseService.useItem(item.id);
+    const result = ItemUseService.executeItem(item.id);
     setUseResult(result);
   };
 

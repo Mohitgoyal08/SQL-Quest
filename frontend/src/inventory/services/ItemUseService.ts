@@ -14,7 +14,7 @@ export interface ItemUseResult {
  * Strictly separated from InventoryService to preserve Single Responsibility.
  */
 export class ItemUseService {
-  static useItem(itemId: string): ItemUseResult {
+  static executeItem(itemId: string): ItemUseResult {
     switch (itemId) {
       case 'beginners_compass':
         return {

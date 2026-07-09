@@ -5,6 +5,7 @@ import { SCENARIO_PRESETS } from './ScenarioLibrary';
 import { PlayerProfileService } from '../services/PlayerProfileService';
 import toast from 'react-hot-toast';
 import { SQL_CHALLENGES } from '../data/challenges';
+import { FEATURES } from '../config/features';
 
 export class DevService {
   /**
@@ -46,8 +47,17 @@ export class DevService {
     // Dispatch progress state override
     devApplyState(preset.state);
 
+    // Apply core state
+    devApplyState(preset.state);
+    
+    // Check feature flags for UI routing overrides
+    let targetGameState = preset.gameState;
+    if (targetGameState === 'TOWN_HUB' && !FEATURES.ENABLE_TOWN_HUB) {
+      targetGameState = 'ISLAND_FLOW';
+    }
+
     // Reset all overlay states
-    setGameState(preset.gameState);
+    setGameState(targetGameState);
     setIsShopOpen(preset.isShopOpen || false);
     setIsVoyageCinematicActive(preset.isVoyageActive || false);
     setIsShipCinematicActive(preset.isShipRevealActive || false);

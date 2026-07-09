@@ -4,7 +4,8 @@ export enum ItemCategory {
   ARTIFACT = 'ARTIFACT',
   TOOL = 'TOOL',
   COSMETIC = 'COSMETIC',
-  CONSUMABLE = 'CONSUMABLE'
+  CONSUMABLE = 'CONSUMABLE',
+  CODEX_FRAGMENT = 'CODEX_FRAGMENT'
 }
 
 export enum ItemRarity {

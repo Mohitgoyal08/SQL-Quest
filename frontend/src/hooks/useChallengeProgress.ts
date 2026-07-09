@@ -108,8 +108,18 @@ export function useChallengeProgress() {
       const nextBadges = [...prev.badges];
       if (rewards.badge && !nextBadges.includes(rewards.badge)) nextBadges.push(rewards.badge);
 
-      // Advance location/NPC if moving to a new challenge
-      const nextChallengeMeta = SQL_CHALLENGES.find(c => c.id === (nextId || challengeId));
+      // Do not automatically advance location/NPC if moving to a DIFFERENT island!
+      // The player must use the map to travel.
+      const currentMeta = SQL_CHALLENGES.find(c => c.id === challengeId);
+      let activeChallengeId = nextId || challengeId;
+      if (nextId) {
+        const nextMeta = SQL_CHALLENGES.find(c => c.id === nextId);
+        if (nextMeta && currentMeta && nextMeta.islandId !== currentMeta.islandId) {
+          activeChallengeId = challengeId; // Stay on the current challenge/island until they manually travel!
+        }
+      }
+
+      const nextChallengeMeta = SQL_CHALLENGES.find(c => c.id === activeChallengeId);
 
       const nextUnlocks = { ...prev.unlocks };
       const nextFleet = { ...prev.fleet };
@@ -146,7 +156,7 @@ export function useChallengeProgress() {
         currentNPC: nextChallengeMeta?.npcId || prev.currentNPC,
         completedIds: nextCompleted,
         unlockedIds: nextUnlocked,
-        currentChallengeId: nextId || challengeId,
+        currentChallengeId: activeChallengeId,
         unlocks: nextUnlocks,
         fleet: nextFleet,
       };

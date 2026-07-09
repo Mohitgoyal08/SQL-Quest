@@ -10,7 +10,7 @@ export default function MissionHeader({ title, npc, difficultyKey }) {
         <span className="text-xs font-bold uppercase tracking-widest text-[#8c6b3e] block select-none">
           Mission Issued By: {npc}
         </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#5c4424] tracking-wide">
+        <h1 className="text-2xl sm:text-3xl font-black font-serif text-[#5c4424] tracking-wide filter drop-shadow-sm">
           {title}
         </h1>
       </div>

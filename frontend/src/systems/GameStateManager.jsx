@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { GAME_STATES } from '../config/gameStates';
 import { QuestManager } from './QuestManager';
+import { WorldManager } from './WorldManager';
 import { PlayerProfileService } from '../services/PlayerProfileService';
 import RewardPopup from '../components/mission/RewardPopup';
 import { useInventory } from '../inventory/hooks/useInventory';
@@ -9,7 +11,8 @@ import { InventoryPanel } from '../components/inventory/InventoryPanel';
 import toast from 'react-hot-toast';
 
 import LandingPage from '../pages/LandingPage';
-import CharacterSelectionPage from '../pages/CharacterSelectionPage';
+import OpeningStory from '../components/cinematics/OpeningStory';
+import WorldReveal from '../components/cinematics/WorldReveal';
 import DialogueScene from '../components/dialogue/DialogueScene';
 import MissionScene from '../components/mission/MissionScene';
 import { ChallengeSidebar } from '../components/challenge/ChallengeSidebar';
@@ -18,9 +21,13 @@ import SeaChartModal from '../components/map/SeaChartModal';
 import SeaChartCinematic from '../components/map/SeaChartCinematic';
 import ShipRevealCinematic from '../components/transition/ShipRevealCinematic';
 import VoyageCinematic from '../components/transition/VoyageCinematic';
+import EndingCinematic from '../components/transition/EndingCinematic';
 import TownHub from '../components/game/world/TownHub';
+import SeaWorld from '../components/game/world/SeaWorld';
+import IslandFlowOrchestrator from '../components/game/world/IslandFlowOrchestrator';
 import Shop from '../components/shop/Shop';
 import DevPanel from '../dev/DevPanel';
+import { FEATURES } from '../config/features';
 
 export default function GameStateManager({ 
   progress, 
@@ -39,8 +46,10 @@ export default function GameStateManager({
   const [gameState, setGameState] = useState(GAME_STATES.LANDING);
   const [isShipCinematicActive, setIsShipCinematicActive] = useState(false);
   const [isVoyageCinematicActive, setIsVoyageCinematicActive] = useState(false);
+  const [isEndingCinematicActive, setIsEndingCinematicActive] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [lastEarnedRewards, setLastEarnedRewards] = useState(null);
+  const [interactingNpc, setInteractingNpc] = useState(null);
   const { items, addItem, clearInventory } = useInventory();
 
 const [inventoryOpen, setInventoryOpen] = useState(false);
@@ -56,93 +65,60 @@ const totalItemCount = items.reduce(
     const profile = PlayerProfileService.loadProfile();
     // Default profile has name 'Privateer'. If it's a real profile, load state.
     if (profile && profile.name !== 'Privateer') {
-      // TODO ADR-0027: Challenge Progress Must Not Control Navigation (merchant_01 check couples progress and map routing)
-      if (progress.currentChallengeId === 'merchant_01' && progress.unlocks?.merchantIslesVoyaged) {
-        setGameState(GAME_STATES.TOWN_HUB);
+      if (WorldManager.isBetweenIslands(progress)) {
+        setGameState(GAME_STATES.SEA);
       } else {
-        setGameState(GAME_STATES.DIALOGUE);
+        setGameState(GAME_STATES.ISLAND_FLOW);
       }
     } else {
-      setGameState(GAME_STATES.CHARACTER_SELECTION);
+      setGameState(GAME_STATES.OPENING_CINEMATIC);
     }
   }, [progress.currentChallengeId, progress.unlocks?.merchantIslesVoyaged]);
-
-  const handleCharacterCreated = useCallback((profile) => {
-    PlayerProfileService.saveProfile(profile);
-    if (typeof onProfileChange === 'function') {
-      onProfileChange(profile);
-    }
-    setGameState(GAME_STATES.DIALOGUE);
-  }, [onProfileChange]);
 
   const handleDialogueComplete = useCallback(() => {
-    // TODO ADR-0027: Challenge Progress Must Not Control Navigation (merchant_01 check couples progress and map routing)
-    // TODO ADR-0029: Tutorial Harbor should migrate to the generic Town Hub architecture.
-    if (progress.currentChallengeId === 'merchant_01' && !progress.unlocks?.merchantIslesVoyaged) {
-      setGameState(null);
-      return;
-    }
-    setGameState(GAME_STATES.MISSION);
-  }, [progress.currentChallengeId, progress.unlocks?.merchantIslesVoyaged]);
-
-  const handleMissionAccepted = useCallback(() => {
-    setGameState(GAME_STATES.CHALLENGE);
+    // Removed legacy dialogue handling
   }, []);
 
-  const handleMissionDeclined = useCallback(() => {
-    setGameState(GAME_STATES.DIALOGUE);
+  const handleOpeningCinematicComplete = useCallback(() => {
+    setGameState(GAME_STATES.WORLD_REVEAL);
   }, []);
 
-  const handleChallengeSuccess = useCallback((challengeId, rewards, nextId) => {
-
-  console.log("MISSION REWARDS:", rewards);
-
-  if (rewards?.item) {
-    console.log("ADDING ITEM:", rewards.item);
-    addItem(rewards.item);
-  }
-
-  completeChallenge(challengeId, rewards, nextId);
-  setLastEarnedRewards(rewards);
-  setGameState(GAME_STATES.REWARD);
-
-  if (challengeId === 'chal_01') {
-    toast.success("🗺️ Weathered Sea Chart unlocked! Check your map.");
-  }
-
-  if (challengeId === 'chal_06') {
-    setIsShipCinematicActive(true);
-  }
-
-}, [completeChallenge, addItem]);
+  const handleWorldRevealComplete = useCallback(() => {
+    setGameState(GAME_STATES.ISLAND_FLOW);
+  }, []);
 
   const handleShipRevealComplete = useCallback((name) => {
     renameShip('sloop_abandoned', name);
     setIsShipCinematicActive(false);
-    onOpenMap();
-  }, [renameShip, onOpenMap]);
+    setGameState(GAME_STATES.SEA);
+  }, [renameShip]);
+
+  const handleFlowComplete = useCallback(() => {
+    if (worldState.currentIsland === 'tutorial_island' && !progress.unlocks?.ship) {
+      setIsShipCinematicActive(true);
+    } else if (worldState.currentIsland === 'pirate_kings_ship') {
+      setIsEndingCinematicActive(true);
+    } else {
+      setGameState(GAME_STATES.SEA);
+    }
+  }, [worldState.currentIsland, progress.unlocks?.ship]);
 
   const handleTravelTo = useCallback((islandId) => {
     onCloseMap();
-    // TODO ADR-0027: Challenge Progress Must Not Control Navigation (merchant_isles string check couples navigation routes)
-    if (islandId === 'merchant_isles' && !progress.unlocks?.merchantIslesVoyaged) {
-      setIsVoyageCinematicActive(true);
+    const firstChallenge = QuestManager.getAllChallenges().find(c => c.islandId === islandId);
+    if (firstChallenge) {
+      setIsVoyageCinematicActive(islandId);
     }
-  }, [progress.unlocks?.merchantIslesVoyaged, onCloseMap]);
+  }, [onCloseMap]);
 
-  const handleVoyageComplete = useCallback(() => {
-    updateUnlock('merchantIslesVoyaged', true);
+  const handleVoyageComplete = useCallback((islandId) => {
     setIsVoyageCinematicActive(false);
-    setGameState(GAME_STATES.TOWN_HUB);
-  }, [updateUnlock]);
-
-  const handleRewardClaimed = useCallback(() => {
-    if (progress.unlocks?.merchantIslesVoyaged) {
-      setGameState(GAME_STATES.TOWN_HUB);
-    } else {
-      setGameState(GAME_STATES.DIALOGUE);
+    const firstChallenge = QuestManager.getAllChallenges().find(c => c.islandId === islandId);
+    if (firstChallenge && devApplyState) {
+      devApplyState({ currentChallengeId: firstChallenge.id });
     }
-  }, [progress.unlocks?.merchantIslesVoyaged]);
+    setGameState(GAME_STATES.ISLAND_FLOW);
+  }, [devApplyState]);
 
   const handlePurchase = useCallback((itemId, price) => {
     adjustCoins(-price);
@@ -156,76 +132,62 @@ const totalItemCount = items.reduce(
         <LandingPage onStart={handleLandingStart} />
       )}
 
-      {gameState === GAME_STATES.CHARACTER_SELECTION && (
-        <CharacterSelectionPage onComplete={handleCharacterCreated} />
-      )}
-
-      {gameState === GAME_STATES.DIALOGUE && (
-        <DialogueScene
-          dialogue={
-            // TODO ADR-0027: Challenge Progress Must Not Control Navigation (merchant_01 check couples progress and map routing)
-            (progress.currentChallengeId === 'merchant_01' && !progress.unlocks?.merchantIslesVoyaged)
-              ? [
-                  {
-                    id: "ready_to_depart_node",
-                    speaker: "Old Barnaby",
-                    avatar: "🛠️",
-                    text: "Your sloop is docked and ready to set sail, Captain. Open your Sea Chart (Map) on the HUD and select the Merchant Isles to begin your first voyage!"
-                  }
-                ]
-              : QuestManager.getDialogueForNPC(worldState.currentNPC, progress.currentChallengeId, progress)
-          }
-          onComplete={handleDialogueComplete}
-        />
-      )}
-
-      {gameState === GAME_STATES.MISSION && (
-        <MissionScene
-          mission={QuestManager.getMissionForChallenge(progress.currentChallengeId)}
-          onAccept={handleMissionAccepted}
-          onDecline={handleMissionDeclined}
-        />
-      )}
-
-      {gameState === GAME_STATES.CHALLENGE && (
-        <div className="flex-1 flex flex-col md:flex-row gap-6 p-4 md:p-6 overflow-hidden max-w-7xl w-full mx-auto">
-          <ChallengeSidebar
-            challenges={QuestManager.getAllChallenges()}
-            progress={progress}
-            onSelect={selectChallenge}
+      <AnimatePresence>
+        {isEndingCinematicActive && (
+          <EndingCinematic 
+            onComplete={() => {
+              setIsEndingCinematicActive(false);
+              setGameState(GAME_STATES.LANDING);
+            }} 
+            playerName={progress?.name || "Privateer"}
           />
+        )}
+      </AnimatePresence>
 
-          <ChallengePanel
-            challenge={currentChallenge}
-            onSuccess={handleChallengeSuccess}
-            isAlreadyCompleted={isChallengeCompleted}
-          />
-        </div>
-      )}
-      {gameState === GAME_STATES.TOWN_HUB && (
+      {gameState === GAME_STATES.TOWN_HUB && FEATURES.ENABLE_TOWN_HUB && (
         <TownHub 
           islandId={worldState.currentIsland} 
           progress={progress} 
           onOpenMap={onOpenMap} 
-          onStartQuest={() => setGameState(GAME_STATES.DIALOGUE)} 
+          onStartQuest={(npcId) => {
+            setInteractingNpc(npcId);
+            setGameState(GAME_STATES.DIALOGUE);
+          }}
           onOpenShop={() => setIsShopOpen(true)}
         />
       )}
-     {gameState === GAME_STATES.REWARD && (
 
-  <RewardPopup
+      {gameState === GAME_STATES.ISLAND_FLOW && (
+        <IslandFlowOrchestrator
+          key={worldState.currentIsland}
+          islandId={worldState.currentIsland}
+          progress={progress}
+          completeChallenge={completeChallenge}
+          selectChallenge={selectChallenge}
+          onOpenMap={onOpenMap}
+          updateUnlock={updateUnlock}
+          addItem={addItem}
+          onFlowComplete={handleFlowComplete}
+          onProfileChange={onProfileChange}
+          onTriggerCinematic={(type) => {
+            if (type === 'ship') setIsShipCinematicActive(true);
+          }}
+        />
+      )}
 
-    rewards={lastEarnedRewards || currentChallenge.rewards}
+      {gameState === GAME_STATES.OPENING_CINEMATIC && (
+        <OpeningStory onComplete={handleOpeningCinematicComplete} />
+      )}
 
-    onClaim={handleRewardClaimed}
+      {gameState === GAME_STATES.WORLD_REVEAL && (
+        <WorldReveal onComplete={handleWorldRevealComplete} />
+      )}
 
-  />
+      {gameState === GAME_STATES.SEA && (
+        <SeaWorld progress={progress} onTravelTo={handleTravelTo} />
+      )}
 
-)}
-{gameState !== GAME_STATES.LANDING &&
-
- gameState !== GAME_STATES.CHARACTER_SELECTION &&
-  gameState !== GAME_STATES.REWARD &&  (
+{gameState !== GAME_STATES.LANDING && (
 
   <>
 
@@ -253,7 +215,7 @@ const totalItemCount = items.reduce(
   !progress.unlocks.seaChartSeen ? (
     <SeaChartCinematic onComplete={() => updateUnlock('seaChartSeen', true)} />
   ) : (
-    <SeaChartModal onClose={onCloseMap} progress={progress} onTravelTo={handleTravelTo} />
+    <SeaChartModal onClose={onCloseMap} progress={progress} />
   )
 )}
 
@@ -261,9 +223,14 @@ const totalItemCount = items.reduce(
   <ShipRevealCinematic onComplete={handleShipRevealComplete} />
 )}
 
-{isVoyageCinematicActive && (
-  <VoyageCinematic onComplete={handleVoyageComplete} progress={progress} />
-)}
+      {isVoyageCinematicActive && (
+        <VoyageCinematic 
+          onComplete={() => handleVoyageComplete(isVoyageCinematicActive)} 
+          progress={progress} 
+          originId={worldState.currentIsland}
+          destinationId={isVoyageCinematicActive}
+        />
+      )}
 
 {isShopOpen && (
   <Shop 

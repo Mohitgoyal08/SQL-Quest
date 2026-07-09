@@ -1,5 +1,6 @@
 // ===== Sprint 9.6 =====
 import React from 'react';
+import { motion } from 'framer-motion';
 import { InventoryItem } from '../../inventory/models/InventoryItem';
 import { ItemRarity } from '../../inventory/models/ItemTypes';
 
@@ -8,22 +9,26 @@ interface InventoryItemCardProps {
   onClick: () => void;
 }
 
-const RARITY_STYLES: Record<ItemRarity, { badge: string; border: string }> = {
+const RARITY_STYLES: Record<ItemRarity, { badge: string; border: string; glow: string }> = {
   [ItemRarity.COMMON]: {
-    badge: 'bg-[#ebd9b4] text-[#5c4424] border-[#8c6b3e]/60',
-    border: 'border-[#8c6b3e]/60 hover:border-[#8c6b3e]',
+    badge: 'bg-slate-700 text-slate-100 border-slate-900/60',
+    border: 'border-[#8c6b3e]/40',
+    glow: 'hover:shadow-[0_0_15px_rgba(140,107,62,0.3)]',
   },
   [ItemRarity.RARE]: {
     badge: 'bg-blue-900 text-blue-100 border-blue-400 font-bold',
-    border: 'border-blue-900/60 hover:border-blue-600',
+    border: 'border-blue-900/40',
+    glow: 'hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]',
   },
   [ItemRarity.EPIC]: {
     badge: 'bg-purple-900 text-purple-100 border-purple-400 font-bold',
-    border: 'border-purple-900/60 hover:border-purple-600',
+    border: 'border-purple-900/40',
+    glow: 'hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]',
   },
   [ItemRarity.LEGENDARY]: {
-    badge: 'bg-amber-600 text-amber-950 border-yellow-300 font-black animate-pulse',
-    border: 'border-amber-600 hover:border-yellow-500 shadow-md',
+    badge: 'bg-amber-600 text-amber-950 border-yellow-300 font-black',
+    border: 'border-amber-500/60',
+    glow: 'hover:shadow-[0_0_30px_rgba(245,158,11,0.9)] animate-pulse',
   },
 };
 
@@ -35,9 +40,11 @@ export const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
     RARITY_STYLES[item.rarity] || RARITY_STYLES[ItemRarity.COMMON];
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      className={`p-3.5 bg-[#ebd9b4]/60 border-2 rounded-xl flex items-start gap-3.5 transition-all duration-300 transform hover:-translate-y-0.5 hover:bg-[#ebd9b4] hover:shadow-lg cursor-pointer ${styles.border}`}
+      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      className={`relative p-3.5 bg-slate-900/80 backdrop-blur border-2 rounded-xl flex items-start gap-3.5 transition-colors duration-300 hover:bg-slate-800 cursor-pointer overflow-hidden group ${styles.border} ${styles.glow}`}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -47,6 +54,8 @@ export const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
         }
       }}
     >
+      {/* Light Sweep Animation on Hover (Phase 12) */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
       {/* Icon Wrapper */}
       <div className="w-12 h-12 bg-[#fdf6e2] border-2 border-[#8c6b3e]/60 rounded-lg shrink-0 flex items-center justify-center text-2xl shadow-inner select-none">
         {item.icon}
@@ -80,10 +89,10 @@ export const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
         </div>
 
         {/* Description */}
-        <p className="text-xs text-amber-950/80 font-medium leading-relaxed line-clamp-2">
+        <p className="text-xs text-slate-300 line-clamp-2 leading-snug">
           {item.description}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };

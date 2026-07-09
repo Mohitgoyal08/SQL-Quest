@@ -31,10 +31,10 @@ export default function CharacterCard({ character, isSelected, onSelect }) {
           ? { duration: 0.4, type: 'spring', stiffness: 300, damping: 10 } 
           : { duration: 0.2 }
       }}
-      className={`relative h-full cursor-pointer select-none rounded-3xl p-5 border-4 transition-colors duration-300 flex flex-col items-center justify-between text-center overflow-hidden focus:outline-none focus:ring-4 focus:ring-ocean/60 ${
+      className={`relative h-full cursor-pointer select-none rounded-3xl p-5 border-4 transition-colors duration-300 flex flex-col items-center justify-between text-center overflow-hidden focus:outline-none focus:ring-4 focus:ring-blue-400/60 ${
         isSelected
-          ? 'bg-parchment border-gold shadow-[0_0_25px_rgba(255,200,55,0.6)]'
-          : 'bg-parchment-light border-pirate-leather/20 shadow-md hover:border-pirate-leather/40 hover:shadow-xl'
+          ? 'bg-[#fef08a] border-[#eab308] shadow-[0_10px_25px_rgba(234,179,8,0.6)]'
+          : 'bg-white border-slate-300 shadow-md hover:border-slate-400 hover:shadow-xl hover:-translate-y-1'
       }`}
     >
       {/* Framer Motion Sparkles (Visible only when selected) */}
@@ -87,16 +87,18 @@ export default function CharacterCard({ character, isSelected, onSelect }) {
           </span>
         </div>
 
-        {/* Hero Name */}
-        <h3 className="text-lg sm:text-xl font-display font-extrabold text-pirate-charcoal tracking-wide mb-2">
+        {/* Character Title */}
+        <h3 className={`font-black text-xl sm:text-2xl mb-2 font-display ${isSelected ? 'text-[#a16207]' : 'text-slate-800'}`}>
           {character.name}
         </h3>
       </div>
 
-      {/* Bottom Section: Narrative Description */}
-      <p className="text-xs sm:text-sm font-sans font-medium text-pirate-leather leading-relaxed line-clamp-3">
-        {character.description}
-      </p>
+      {/* Description Section */}
+      <div className="w-full mt-auto relative z-10">
+        <p className={`text-sm sm:text-base font-bold leading-relaxed line-clamp-4 px-2 ${isSelected ? 'text-[#713f12]' : 'text-slate-500'}`}>
+          {character.description}
+        </p>
+      </div>
     </motion.div>
   );
 }
