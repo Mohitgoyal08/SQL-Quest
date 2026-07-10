@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SQL_CHALLENGES, ChallengeRewards } from '../data/challenges';
 import { getStorageKey } from '../dev/DevStorage';
+import { apiClient, getAccessToken } from '../services/api';
 
 const STORAGE_KEY = getStorageKey('save', 'sql_quest_player_save_v2');
 
@@ -82,10 +83,22 @@ export function useChallengeProgress() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      
+      // Background Cloud Sync
+      if (getAccessToken()) {
+        apiClient.post('/progress/sync', {
+          state: progress,
+          local_timestamp: new Date().toISOString()
+        }).catch(err => console.error("Cloud Sync Failed:", err));
+      }
     } catch (e) {
       console.error("Failed to persist save state:", e);
     }
   }, [progress]);
+
+  const setServerProgress = useCallback((serverState: PlayerProgressState) => {
+    setProgress(serverState);
+  }, []);
 
   const completeChallenge = useCallback((challengeId: string, rewards: ChallengeRewards, nextId: string | null) => {
     setProgress((prev) => {
@@ -219,5 +232,5 @@ export function useChallengeProgress() {
     }));
   }, []);
 
-  return { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState };
+  return { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress };
 }

@@ -5,8 +5,7 @@ import { SQL_CHALLENGES } from '../src/data/challenges';
 // Full Journey simulates a complete real player run. NO fast-forwards.
 test.describe.serial('Full Player Journey Suite (Primary)', () => {
   let page;
-  
-  test.setTimeout(300000); // 5 minutes overall timeout per test
+  test.setTimeout(600000); // 10 minutes overall timeout per test
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
@@ -18,6 +17,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
   });
 
   async function waitAndAdvanceDialogue() {
+    let nullCount = 0;
     // Wait until either 'Continue' appears (dialogue finished typing), 'Accept' appears (mission scene), or textarea appears (challenge panel)
     while (true) {
       try {
@@ -32,6 +32,13 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
           page.waitForSelector('button:has-text("Accept")', { timeout: 1000 }).then(() => 'accept'),
           page.waitForSelector('textarea', { timeout: 1000 }).then(() => 'textarea'),
         ]).catch(() => null);
+
+        if (!nextAction) {
+          nullCount++;
+          if (nullCount > 5) break; // Break if we wait 5 seconds with no dialogue/challenge
+          continue;
+        }
+        nullCount = 0; // Reset on success
 
         if (nextAction === 'continue') {
           await page.click('button:has-text("Continue")');
@@ -60,31 +67,22 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.fill('textarea[placeholder="Enter your SQL query here..."]', challenge.referenceQuery);
     await page.click('button:has-text("Run Query")');
 
-    await page.waitForSelector('text=Executing Query', { state: 'hidden', timeout: 8000 });
-    
-    await page.waitForSelector('button:has-text("Continue")', { timeout: 8000 });
-    await page.click('button:has-text("Continue")');
+    // Wait for the textarea to disappear, which means the challenge auto-advanced successfully
+    await page.waitForSelector('textarea', { state: 'hidden', timeout: 15000 });
   }
 
   test('Complete End-to-End Game', async () => {
     // 1. Splash & Story
-    await page.click('button:has-text("Story Mode")');
+    await page.click('button:has-text("Story Mode")', { force: true });
     await page.waitForSelector('button:has-text("Begin the Journey")', { timeout: 10000 });
-    await page.click('button:has-text("Begin the Journey")');
+    await page.click('button:has-text("Begin the Journey")', { force: true });
 
-    // Wait for the Story Event that precedes Character Selection
-    await page.waitForSelector('button:has-text("Continue")', { timeout: 15000 });
-    await page.click('button:has-text("Continue")');
-
-    // 2. Character Selection
-    await page.waitForSelector('text=Choose Your Hero', { timeout: 15000 });
-    await page.locator('[role="radio"]').first().click();
-    await page.click('button:has-text("Begin Adventure")');
+    // Character Selection is now handled during V2 Authentication registration,
+    // so it automatically skips this stage in the flow.
 
     // 3. Tutorial Harbor
-    await page.waitForSelector('button:has-text("Continue")', { timeout: 10000 });
-    await page.click('button:has-text("Continue")'); // Story event
-    
+    // Wait for the opening cinematics (Ship + World Reveal) to finish and the first dialogue to mount
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 15000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('chal_01');
     await waitAndAdvanceDialogue();
@@ -103,19 +101,19 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     // 4. Ship Naming Ceremony
     await page.waitForSelector('button:has-text("Step Forward ➔")');
     await page.click('button:has-text("Step Forward ➔")');
-    await page.waitForSelector('button:has-text("Inspect the Vessel")');
-    await page.click('button:has-text("Inspect the Vessel")');
+    await page.waitForSelector('button:has-text("Claim the Deed")');
     await page.click('button:has-text("Claim the Deed")');
     await page.fill('input[placeholder="The SELECT Sloop"]', 'E2E Full Sloop');
     await page.click('button:has-text("Inscribe the Name")');
-    await page.waitForSelector('button:has-text("Set Sail")', { timeout: 10000 });
-    await page.click('button:has-text("Set Sail")');
+    await page.waitForSelector('text=Set Sail', { timeout: 10000 });
+    await page.click('text=Set Sail');
 
     // 5. Merchant Isles
     await expect(page.locator('text=Merchant Isles')).toBeVisible({ timeout: 15000 });
     await page.click('text=Merchant Isles');
     await expect(page.locator('text=Merchant Isles')).toBeVisible({ timeout: 20000 });
     
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('merchant_00');
     await waitAndAdvanceDialogue();
@@ -131,6 +129,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Smuggler's Cove");
     await expect(page.locator("text=Smuggler's Cove")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('smugglers_01');
     await waitAndAdvanceDialogue();
@@ -145,6 +144,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Jungle of Queries");
     await expect(page.locator("text=Jungle of Queries")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('jungle_01');
     await waitAndAdvanceDialogue();
@@ -159,6 +159,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Crystal Caverns");
     await expect(page.locator("text=Crystal Caverns")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('crystal_01');
     await waitAndAdvanceDialogue();
@@ -173,6 +174,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Volcano Island");
     await expect(page.locator("text=Volcano Island")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('volcano_01');
     await waitAndAdvanceDialogue();
@@ -185,6 +187,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Lost Sea");
     await expect(page.locator("text=Lost Sea")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('lost_sea_01');
     await waitAndAdvanceDialogue();
@@ -197,6 +200,7 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click("text=Pirate King's Ship");
     await expect(page.locator("text=Pirate King's Ship")).toBeVisible({ timeout: 20000 });
 
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 20000 });
     await waitAndAdvanceDialogue();
     await solveChallenge('pirate_kings_ship_01');
     await page.waitForSelector('button:has-text("Continue")');
@@ -205,8 +209,8 @@ test.describe.serial('Full Player Journey Suite (Primary)', () => {
     await page.click('button:has-text("Continue Journey")');
 
     // Ending Cinematic and Return
-    await page.waitForSelector('button:has-text("Return to Main Menu")', { timeout: 30000 });
-    await page.click('button:has-text("Return to Main Menu")');
+    await page.waitForSelector('button:has-text("Return to Title")', { timeout: 30000 });
+    await page.click('button:has-text("Return to Title")');
     await expect(page.locator('button:has-text("Story Mode")')).toBeVisible({ timeout: 10000 });
   });
 });

@@ -15,7 +15,6 @@ export class DevService {
     presetKey,
     devApplyState,
     setGameState,
-    setIsShopOpen,
     onOpenMap,
     onCloseMap,
     setIsVoyageCinematicActive,
@@ -58,7 +57,6 @@ export class DevService {
 
     // Reset all overlay states
     setGameState(targetGameState);
-    setIsShopOpen(preset.isShopOpen || false);
     setIsVoyageCinematicActive(preset.isVoyageActive || false);
     setIsShipCinematicActive(preset.isShipRevealActive || false);
     setInventoryOpen(false);

@@ -1,5 +1,4 @@
 import { DialogueRepository } from '../data/repositories/DialogueRepository';
-import { MissionRepository } from '../data/repositories/MissionRepository';
 import { SQL_CHALLENGES } from '../data/challenges';
 import { WorldManager } from './WorldManager';
 
@@ -27,14 +26,12 @@ export class QuestManager {
   }
 
   static getMissionForChallenge(challengeId) {
-    const baseMission = MissionRepository.getMission(challengeId) || {};
     const challenge = this.getActiveChallenge(challengeId) || SQL_CHALLENGES[0] || {};
 
     return {
-      ...baseMission,
       id: challenge.id || 'unknown_challenge',
       title: challenge.title || 'Untitled Mission',
-      npc: challenge.npcId || baseMission.npc || 'Unknown NPC',
+      npc: challenge.npcId || 'Unknown NPC',
       description: challenge.story || 'No story details available.',
       difficultyKey: (challenge.difficulty || 'Novice').toUpperCase(),
       objectives: [

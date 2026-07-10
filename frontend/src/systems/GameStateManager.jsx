@@ -22,10 +22,8 @@ import SeaChartCinematic from '../components/map/SeaChartCinematic';
 import ShipRevealCinematic from '../components/transition/ShipRevealCinematic';
 import VoyageCinematic from '../components/transition/VoyageCinematic';
 import EndingCinematic from '../components/transition/EndingCinematic';
-import TownHub from '../components/game/world/TownHub';
 import SeaWorld from '../components/game/world/SeaWorld';
 import IslandFlowOrchestrator from '../components/game/world/IslandFlowOrchestrator';
-import Shop from '../components/shop/Shop';
 import DevPanel from '../dev/DevPanel';
 import { FEATURES } from '../config/features';
 
@@ -47,9 +45,6 @@ export default function GameStateManager({
   const [isShipCinematicActive, setIsShipCinematicActive] = useState(false);
   const [isVoyageCinematicActive, setIsVoyageCinematicActive] = useState(false);
   const [isEndingCinematicActive, setIsEndingCinematicActive] = useState(false);
-  const [isShopOpen, setIsShopOpen] = useState(false);
-  const [lastEarnedRewards, setLastEarnedRewards] = useState(null);
-  const [interactingNpc, setInteractingNpc] = useState(null);
   const { items, addItem, clearInventory } = useInventory();
 
 const [inventoryOpen, setInventoryOpen] = useState(false);
@@ -62,18 +57,17 @@ const totalItemCount = items.reduce(
   const isChallengeCompleted = progress.completedIds.includes(currentChallenge.id);
 
   const handleLandingStart = useCallback(() => {
-    const profile = PlayerProfileService.loadProfile();
-    // Default profile has name 'Privateer'. If it's a real profile, load state.
-    if (profile && profile.name !== 'Privateer') {
+    // If this is a fresh game (level 1, tutorial), show the cinematic
+    if (progress.level === 1 && !progress.completedIds.length) {
+      setGameState(GAME_STATES.OPENING_CINEMATIC);
+    } else {
       if (WorldManager.isBetweenIslands(progress)) {
         setGameState(GAME_STATES.SEA);
       } else {
         setGameState(GAME_STATES.ISLAND_FLOW);
       }
-    } else {
-      setGameState(GAME_STATES.OPENING_CINEMATIC);
     }
-  }, [progress.currentChallengeId, progress.unlocks?.merchantIslesVoyaged]);
+  }, [progress, progress.currentChallengeId, progress.unlocks?.merchantIslesVoyaged]);
 
   const handleDialogueComplete = useCallback(() => {
     // Removed legacy dialogue handling
@@ -94,14 +88,16 @@ const totalItemCount = items.reduce(
   }, [renameShip]);
 
   const handleFlowComplete = useCallback(() => {
-    if (worldState.currentIsland === 'tutorial_island' && !progress.unlocks?.ship) {
+    if (worldState.currentIsland === 'tutorial_island') {
+      // Tutorial Harbor explicitly flows into Ship Reveal Cinematic.
+      // The transition to SEA is handled by handleShipRevealComplete.
       setIsShipCinematicActive(true);
     } else if (worldState.currentIsland === 'pirate_kings_ship') {
       setIsEndingCinematicActive(true);
     } else {
       setGameState(GAME_STATES.SEA);
     }
-  }, [worldState.currentIsland, progress.unlocks?.ship]);
+  }, [worldState.currentIsland]);
 
   const handleTravelTo = useCallback((islandId) => {
     onCloseMap();
@@ -119,11 +115,6 @@ const totalItemCount = items.reduce(
     }
     setGameState(GAME_STATES.ISLAND_FLOW);
   }, [devApplyState]);
-
-  const handlePurchase = useCallback((itemId, price) => {
-    adjustCoins(-price);
-    addItem(itemId);
-  }, [adjustCoins, addItem]);
 
   return (
     <div className="flex-1 flex flex-col relative overflow-hidden">
@@ -143,19 +134,6 @@ const totalItemCount = items.reduce(
           />
         )}
       </AnimatePresence>
-
-      {gameState === GAME_STATES.TOWN_HUB && FEATURES.ENABLE_TOWN_HUB && (
-        <TownHub 
-          islandId={worldState.currentIsland} 
-          progress={progress} 
-          onOpenMap={onOpenMap} 
-          onStartQuest={(npcId) => {
-            setInteractingNpc(npcId);
-            setGameState(GAME_STATES.DIALOGUE);
-          }}
-          onOpenShop={() => setIsShopOpen(true)}
-        />
-      )}
 
       {gameState === GAME_STATES.ISLAND_FLOW && (
         <IslandFlowOrchestrator
@@ -232,15 +210,6 @@ const totalItemCount = items.reduce(
         />
       )}
 
-{isShopOpen && (
-  <Shop 
-    merchantId={worldState.currentIsland} 
-    progress={progress} 
-    onClose={() => setIsShopOpen(false)} 
-    onPurchase={handlePurchase} 
-  />
-)}
-
 {import.meta.env.DEV && (
   <DevPanel
     progress={progress}
@@ -253,7 +222,6 @@ const totalItemCount = items.reduce(
     updateUnlock={updateUnlock}
     devApplyState={devApplyState}
     completeChallenge={completeChallenge}
-    setIsShopOpen={setIsShopOpen}
     onOpenMap={onOpenMap}
     onCloseMap={onCloseMap}
     setInventoryOpen={setInventoryOpen}

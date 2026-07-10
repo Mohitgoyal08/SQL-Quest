@@ -97,9 +97,10 @@ export default function MissionRewardPanel({ rewards = {}, onClaim }) {
             }}
             whileHover={{ scale: 1.02, boxShadow: "0 10px 25px rgba(4,120,87,0.4)" }}
             whileTap={{ scale: 0.98 }}
-            className="mt-6 w-full py-4 bg-gradient-to-b from-emerald-600 to-emerald-800 text-white font-black text-sm md:text-base uppercase tracking-[0.2em] rounded-xl border-2 border-emerald-400 shadow-xl transition-all cursor-pointer"
+            className="mt-6 w-full py-4 bg-gradient-to-b from-[#22c55e] to-[#16a34a] text-white font-black text-sm md:text-base uppercase tracking-[0.2em] rounded-[20px] border-4 border-[#14532d] shadow-[0_8px_0_#166534,0_15px_20px_rgba(0,0,0,0.4)] transition-all cursor-pointer active:translate-y-2 active:shadow-[0_0px_0_#166534,0_5px_10px_rgba(0,0,0,0.4)]"
+            style={{ WebkitTextStroke: '1px #14532d' }}
           >
-            Continue Journey ⚓
+            <span className="drop-shadow-sm">Continue Journey ⚓</span>
           </motion.button>
         )}
       </motion.div>

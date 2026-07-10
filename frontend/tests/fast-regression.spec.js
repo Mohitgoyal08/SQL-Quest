@@ -5,7 +5,7 @@ import { SQL_CHALLENGES } from '../src/data/challenges';
 // Fast Regression strictly requires serial execution to maintain game state across tests
 test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
   let page;
-  test.setTimeout(120000); // 2 minutes
+  test.setTimeout(60000); // 60 seconds
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
@@ -29,6 +29,7 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
   });
 
   async function advanceDialogue() {
+    let nullCount = 0;
     // Wait until either 'Continue' appears (dialogue finished typing), 'Accept' appears (mission scene), or textarea appears (challenge panel)
     while (true) {
       try {
@@ -43,6 +44,13 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
           page.waitForSelector('button:has-text("Accept")', { timeout: 1000 }).then(() => 'accept'),
           page.waitForSelector('textarea', { timeout: 1000 }).then(() => 'textarea'),
         ]).catch(() => null);
+
+        if (!nextAction) {
+          nullCount++;
+          if (nullCount > 5) break;
+          continue;
+        }
+        nullCount = 0;
 
         if (nextAction === 'continue') {
           await page.click('button:has-text("Continue")');
@@ -61,8 +69,8 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
     const challenge = SQL_CHALLENGES.find(c => c.id === challengeId);
     if (!challenge) throw new Error(`Challenge ${challengeId} not found!`);
 
-    // Verify mission card appears
-    await expect(page.locator(`text=${challenge.title}`).first()).toBeVisible({ timeout: 10000 });
+    // Verify mission card appears (wait for the h1 to ensure it's in the ChallengePanel, not the sidebar)
+    await expect(page.locator(`h1:has-text("${challenge.title}")`)).toBeVisible({ timeout: 10000 });
     if (await page.locator('button:has-text("Accept")').isVisible()) {
       await page.click('button:has-text("Accept")');
     }
@@ -74,30 +82,24 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
     // Wait for fake execution delay
     await page.waitForSelector('text=Executing Query', { state: 'hidden', timeout: 5000 });
     
-    // Continue from success/reward
-    await page.waitForSelector('button:has-text("Continue")', { timeout: 5000 });
-    await page.click('button:has-text("Continue")');
-    
+    // Note: ChallengePanel now auto-advances after 1400ms. Wait for it to finish and unmount.
+    await page.waitForTimeout(2000);
   }
 
   test('Splash Screen and Intro', async () => {
-    await page.click('button:has-text("Story Mode")');
+    await page.click('button:has-text("Story Mode")', { force: true });
 
     await page.waitForSelector('button:has-text("Begin the Journey")');
-    await page.click('button:has-text("Begin the Journey")');
+    await page.click('button:has-text("Begin the Journey")', { force: true });
 
-    // Wait for the Story Event that precedes Character Selection
-    await page.waitForSelector('button:has-text("Continue")');
-    await page.click('button:has-text("Continue")');
-
-    await page.waitForSelector('text=Choose Your Hero');
-    
-    await page.locator('[role="radio"]').first().click();
-    await page.click('button:has-text("Begin Adventure")');
+    // Character Selection is now handled during V2 Authentication registration,
+    // so it automatically skips this stage in the flow.
   });
 
   test('Tutorial Harbor', async () => {
     // Challenges
+    // Wait for the opening cinematics (Ship + World Reveal) to finish and the first dialogue to mount
+    await page.waitForSelector('button:has-text("Continue")', { timeout: 15000 });
     await advanceDialogue();
     await solveChallenge('chal_01');
     
@@ -120,10 +122,15 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
     // Ship Reveal Cinematic
     await page.waitForSelector('button:has-text("Step Forward ➔")');
     await page.click('button:has-text("Step Forward ➔")');
-    await page.waitForSelector('button:has-text("Inspect the Vessel")');
-    await page.click('button:has-text("Inspect the Vessel")');
+    
+    // (Inspect the Vessel was removed, goes straight to Claim the Deed)
+    await page.waitForSelector('button:has-text("Claim the Deed")');
     await page.click('button:has-text("Claim the Deed")');
+    
+    await page.waitForSelector('input[placeholder="The SELECT Sloop"]');
     await page.fill('input[placeholder="The SELECT Sloop"]', 'E2E Test Sloop');
+    
+    await page.waitForSelector('button:has-text("Inscribe the Name")');
     await page.click('button:has-text("Inscribe the Name")');
     
     await page.waitForSelector('button:has-text("Set Sail")');
@@ -234,8 +241,8 @@ test.describe.serial('Fast Regression Suite (Developer Mode)', () => {
     await page.click('button:has-text("Continue Journey")');
 
     // Ending Cinematic triggers
-    await page.waitForSelector('button:has-text("Return to Main Menu")', { timeout: 15000 });
-    await page.click('button:has-text("Return to Main Menu")');
+    await page.waitForSelector('button:has-text("Return to Title")', { timeout: 15000 });
+    await page.click('button:has-text("Return to Title")');
 
     // Verify we are back on splash
     await expect(page.locator('button:has-text("Story Mode")')).toBeVisible();

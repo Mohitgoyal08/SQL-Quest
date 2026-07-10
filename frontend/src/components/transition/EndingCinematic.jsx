@@ -129,9 +129,10 @@ export default function EndingCinematic({ onComplete, playerName = "Captain" }) 
               animate={{ opacity: 1 }}
               transition={{ delay: 2 }}
               onClick={onComplete}
-              className="px-8 py-3 bg-transparent border-2 border-[#8c6b3e] text-[#ebd9b4] hover:bg-[#8c6b3e]/20 transition-colors rounded uppercase tracking-widest text-sm font-bold cursor-pointer"
+              className="px-10 py-4 bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white border-4 border-[#92400e] font-black text-lg uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_0_#92400e,0_15px_20px_rgba(0,0,0,0.4)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#92400e,0_5px_10px_rgba(0,0,0,0.4)] cursor-pointer"
+              style={{ WebkitTextStroke: '1px #78350f' }}
             >
-              Return to Title
+              <span className="drop-shadow-sm">Return to Title</span>
             </motion.button>
           </motion.div>
         )}

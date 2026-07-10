@@ -27,6 +27,8 @@ export const ISLAND_FLOWS = {
     stages: [
       { type: 'ARRIVAL' },
       { type: 'TITLE', title: 'Merchant Isles' },
+      { type: 'DIALOGUE', id: 'merchant_00' },
+      { type: 'CHALLENGE', id: 'merchant_00' },
       { type: 'DIALOGUE', id: 'merchant_01' },
       { type: 'CHALLENGE', id: 'merchant_01' },
       { type: 'STORY_EVENT', content: 'Quincy looks worried as he hands over the manifest...' },

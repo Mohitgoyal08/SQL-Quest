@@ -57,7 +57,7 @@ export default function CharacterSelectionPage({ onComplete }) {
         avatar: selected.id,
     };
 
-    console.log("Starting adventure:", profile);
+
 
     if (typeof onComplete === "function") {
         onComplete(profile);

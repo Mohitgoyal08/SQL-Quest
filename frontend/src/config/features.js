@@ -6,5 +6,4 @@
 
 export const FEATURES = {
   ENABLE_ECONOMY: false,  // Hides Coins, Gems, Shops, and economy UI
-  ENABLE_TOWN_HUB: false, // Disables free-roaming Town Hub in favor of linear Universal Island Flow
 };

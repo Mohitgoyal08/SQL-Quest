@@ -19,7 +19,6 @@ export default function DevPanel({
   updateUnlock,
   devApplyState,
   completeChallenge,
-  setIsShopOpen,
   onOpenMap,
   onCloseMap,
   setInventoryOpen,
@@ -48,7 +47,6 @@ export default function DevPanel({
       key,
       devApplyState,
       setGameState,
-      setIsShopOpen,
       onOpenMap,
       onCloseMap,
       setIsVoyageCinematicActive,
@@ -350,12 +348,6 @@ export default function DevPanel({
                       Sea Chart
                     </button>
                     <button
-                      onClick={() => { setIsShopOpen(true); toast.success('✓ Render: Shop'); }}
-                      className="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-center cursor-pointer font-bold"
-                    >
-                      Open Shop
-                    </button>
-                    <button
                       onClick={() => { setIsVoyageCinematicActive(true); toast.success('✓ Render: Voyage'); }}
                       className="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-center cursor-pointer font-bold"
                     >
@@ -366,12 +358,6 @@ export default function DevPanel({
                       className="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-center cursor-pointer font-bold"
                     >
                       Ship Reveal
-                    </button>
-                    <button
-                      onClick={() => { setGameState(GAME_STATES.TOWN_HUB); toast.success('✓ Render: Town Hub'); }}
-                      className="py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-center cursor-pointer font-bold"
-                    >
-                      Town Hub
                     </button>
                   </div>
                 </div>

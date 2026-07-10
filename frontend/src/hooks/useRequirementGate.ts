@@ -31,14 +31,6 @@ export const useRequirementGate = (progress: PlayerProgressState) => {
     );
   }, [progress]);
 
-  console.log(
-  isChallengeAccessible({
-    id: "test",
-    requirements: {
-      requiredItem: "fake_item"
-    }
-  } as SQLChallenge)
-);
 
   return {
     isIslandAccessible,

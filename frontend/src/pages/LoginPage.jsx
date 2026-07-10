@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
+  const { login, register } = useAuth();
+  
+  const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
+  const [authError, setAuthError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Lightweight Frontend Validation
   const validateForm = () => {
@@ -20,18 +27,37 @@ export default function LoginPage() {
       newErrors.email = "Ahoy! That doesn't look like a valid seafaring email address.";
     }
 
+    if (isRegistering && !displayName) {
+      newErrors.displayName = "Every Captain needs a name to strike fear into the kraken!";
+    }
+
     if (!password) {
       newErrors.password = "Ye must provide your secret code to unlock the bridge!";
+    } else if (isRegistering && password.length < 6) {
+      newErrors.password = "Your secret code must be at least 6 characters long.";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setAuthError(null);
     if (validateForm()) {
-      console.log('Login Attempt Approved:', { email, rememberMe });
+      setIsSubmitting(true);
+      
+      let res;
+      if (isRegistering) {
+        res = await register(email, password, displayName);
+      } else {
+        res = await login(email, password);
+      }
+      
+      if (!res.success) {
+        setAuthError(res.error || "An unknown sea monster blocked your request.");
+      }
+      setIsSubmitting(false);
     }
   };
 
@@ -43,7 +69,6 @@ export default function LoginPage() {
     <div className="flex flex-col w-full select-none">
       {/* 1. Mascot Placeholder & Welcoming Header */}
       <div className="text-center mb-6">
-        {/* Decorative Pirate Mascot Placeholder */}
         <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-pirate-leather/15 border-2 border-dashed border-pirate-leather/40 flex items-center justify-center shadow-inner">
           <span className="text-[10px] font-bold uppercase tracking-widest text-pirate-leather/70">
             Mascot
@@ -51,15 +76,63 @@ export default function LoginPage() {
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-pirate-charcoal tracking-wide">
-          Welcome Back, Captain!
+          {isRegistering ? "Join the Guild!" : "Welcome Back, Captain!"}
         </h2>
         <p className="text-xs sm:text-sm font-sans font-medium text-pirate-leather mt-1">
-          The crew awaits, and the SQL Codex has begun glowing again.
+          {isRegistering ? "Enlist now to begin your SQL adventure." : "The crew awaits, and the SQL Codex has begun glowing again."}
         </p>
       </div>
 
-      {/* 2. Authentication Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        {authError && (
+          <div className="bg-pirate-crimson/10 border border-pirate-crimson/30 rounded-lg p-3 text-sm font-bold text-pirate-crimson flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <p>{authError}</p>
+          </div>
+        )}
+        
+        <AnimatePresence>
+          {isRegistering && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+              className="flex flex-col gap-1.5"
+            >
+              <label htmlFor="displayName" className="text-xs font-bold uppercase tracking-wider text-pirate-leather">
+                Captain's Name
+              </label>
+              <div className="relative flex items-center">
+                <User className="absolute left-3.5 w-5 h-5 text-pirate-leather/60 pointer-events-none" />
+                <input
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => {
+                    setDisplayName(e.target.value);
+                    if (errors.displayName) setErrors({ ...errors, displayName: '' });
+                  }}
+                  placeholder="Blackbeard"
+                  className={`w-full pl-11 pr-4 py-3 bg-white/80 rounded-2xl border-2 transition-all shadow-inner font-medium text-sm text-pirate-charcoal placeholder:text-pirate-leather/40 select-text focus:outline-none ${
+                    errors.displayName 
+                      ? 'border-pirate-crimson bg-pirate-crimson/5 focus:border-pirate-crimson' 
+                      : 'border-pirate-leather/25 focus:border-ocean focus:bg-white'
+                  }`}
+                />
+              </div>
+              {errors.displayName && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -4 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  className="flex items-center gap-1.5 text-xs font-bold text-pirate-crimson px-1"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{errors.displayName}</span>
+                </motion.p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Email Input */}
         <div className="flex flex-col gap-1.5">
@@ -139,34 +212,39 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Remember Me & Forgot Password Row */}
-        <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-pirate-charcoal font-bold">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded appearance-none border-2 border-pirate-leather/40 bg-white checked:bg-ocean checked:border-ocean cursor-pointer transition-colors relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[10px] after:font-extrabold"
-            />
-            <span>Keep Ship Anchored</span>
-          </label>
-          <button
-            type="button"
-            onClick={() => console.log('Recover Passcode Triggered')}
-            className="font-bold text-ocean hover:text-ocean-deep hover:underline transition-colors focus:outline-none cursor-pointer"
-          >
-            Lost Your Code?
-          </button>
-        </div>
+        {!isRegistering && (
+          <div className="flex items-center justify-between text-xs sm:text-sm pt-1">
+            <label className="flex items-center gap-2 cursor-pointer text-pirate-charcoal font-bold">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded appearance-none border-2 border-pirate-leather/40 bg-white checked:bg-ocean checked:border-ocean cursor-pointer transition-colors relative after:content-['✓'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-white after:text-[10px] after:font-extrabold"
+              />
+              <span>Keep Ship Anchored</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => console.log('Recover Passcode Triggered')}
+              className="font-bold text-ocean hover:text-ocean-deep hover:underline transition-colors focus:outline-none cursor-pointer"
+            >
+              Lost Your Code?
+            </button>
+          </div>
+        )}
 
-        {/* 3. Chunky Nintendo/Duolingo Primary Submit Button */}
         <motion.button
           type="submit"
+          disabled={isSubmitting}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.97, y: 2 }}
-          className="w-full mt-2 py-3.5 px-6 bg-gold hover:bg-gold-shimmer text-pirate-charcoal font-display font-extrabold text-lg tracking-wider rounded-2xl border-b-[5px] border-gold-dark shadow-md active:border-b-0 cursor-pointer transition-colors flex items-center justify-center gap-2 uppercase"
+          className={`w-full mt-2 py-3.5 px-6 font-display font-extrabold text-lg tracking-wider rounded-2xl border-b-[5px] shadow-md transition-colors flex items-center justify-center gap-2 uppercase ${
+            isSubmitting 
+              ? 'bg-pirate-leather/20 text-pirate-leather border-pirate-leather/30 cursor-not-allowed' 
+              : 'bg-gold hover:bg-gold-shimmer text-pirate-charcoal border-gold-dark active:border-b-0 cursor-pointer'
+          }`}
         >
-          Resume Voyage
+          {isSubmitting ? 'Loading...' : isRegistering ? 'Join the Guild' : 'Resume Voyage'}
         </motion.button>
       </form>
 
@@ -202,15 +280,18 @@ export default function LoginPage() {
         </span>
       </motion.button>
 
-      {/* 6. Footer Navigation Prompt */}
       <div className="mt-6 text-center text-xs sm:text-sm font-bold text-pirate-leather">
-        First time sailing these waters?{' '}
+        {isRegistering ? "Already sailed these waters? " : "First time sailing these waters? "}
         <button
           type="button"
-          onClick={() => console.log('Navigate to Sign Up')}
+          onClick={() => {
+            setIsRegistering(!isRegistering);
+            setErrors({});
+            setAuthError(null);
+          }}
           className="text-ocean hover:text-ocean-deep hover:underline transition-colors font-extrabold cursor-pointer"
         >
-          Enlist in the Guild
+          {isRegistering ? "Log In" : "Enlist in the Guild"}
         </button>
       </div>
     </div>

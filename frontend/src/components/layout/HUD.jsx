@@ -11,6 +11,7 @@ export default function HUD({
   currentNPC = 'Captain Blackbeard',
   hasSeaChart = false,
   onMapOpen,
+  onLogout,
   activeShipName = null
 }) {
   return (
@@ -62,6 +63,15 @@ export default function HUD({
           >
             🎒 Bag
           </button>
+          {onLogout && (
+            <button 
+              type="button" 
+              onClick={onLogout}
+              className="ml-2 px-3 py-1.5 bg-pirate-crimson/80 border border-pirate-crimson hover:bg-pirate-crimson rounded-lg text-xs font-bold text-[#ebd9b4] transition-all shadow-md cursor-pointer"
+            >
+              Log Out
+            </button>
+          )}
         </div>
       </div>
 

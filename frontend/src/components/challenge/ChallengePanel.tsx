@@ -212,16 +212,26 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
             <button
               onClick={handleRunQuery}
               disabled={isExecuting}
-              className="px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-950 text-white font-extrabold text-sm uppercase tracking-wider rounded-lg border-2 border-emerald-900 shadow-md transition-all cursor-pointer flex items-center gap-2"
+              className={`px-8 py-3 rounded-2xl border-4 font-black text-sm uppercase tracking-widest transition-all select-none flex items-center justify-center gap-2 ${
+                isExecuting
+                  ? 'bg-gray-400 text-gray-200 border-gray-500 shadow-[0_6px_0_#4b5563,0_10px_15px_rgba(0,0,0,0.3)] cursor-not-allowed'
+                  : 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] text-white border-[#14532d] shadow-[0_6px_0_#166534,0_10px_15px_rgba(0,0,0,0.3)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#166534,0_4px_8px_rgba(0,0,0,0.3)] cursor-pointer'
+              }`}
+              style={{ WebkitTextStroke: isExecuting ? '1px #374151' : '1px #14532d' }}
             >
-              <span>{isExecuting ? '⏳ Executing...' : '▶ Run Query'}</span>
+              <span className="drop-shadow-sm">{isExecuting ? '⏳ Executing...' : '▶ Run Query'}</span>
             </button>
             <button
               onClick={handleReset}
               disabled={isExecuting}
-              className="px-4 py-2.5 bg-[#ebd9b4] hover:bg-[#dfcb9f] text-[#5c4424] font-bold text-xs uppercase tracking-wider rounded-lg border border-[#8c6b3e]/60 transition-colors cursor-pointer"
+              className={`px-6 py-3 rounded-2xl border-4 font-black text-xs uppercase tracking-widest transition-all select-none flex items-center justify-center ${
+                isExecuting
+                  ? 'bg-gray-400 text-gray-200 border-gray-500 shadow-[0_4px_0_#4b5563,0_8px_10px_rgba(0,0,0,0.3)] cursor-not-allowed'
+                  : 'bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white border-[#92400e] shadow-[0_4px_0_#92400e,0_8px_10px_rgba(0,0,0,0.3)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#92400e,0_2px_4px_rgba(0,0,0,0.3)] cursor-pointer'
+              }`}
+              style={{ WebkitTextStroke: isExecuting ? '1px #374151' : '1px #78350f' }}
             >
-              Reset
+              <span className="drop-shadow-sm">Reset</span>
             </button>
           </div>
 

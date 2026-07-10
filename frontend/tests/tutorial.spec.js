@@ -18,12 +18,8 @@ test.describe('Tutorial Harbor Spec', () => {
     await page.waitForSelector('button:has-text("Begin the Journey")', { state: 'visible', timeout: 6000 });
     await page.click('button:has-text("Begin the Journey")');
 
-    // Wait for World Reveal cinematic (6s) and then Character Selection to appear
-    await page.waitForSelector('text=Choose Your Hero', { state: 'visible', timeout: 10000 });
-
-    // Select Hero
-    await page.locator('[role="radio"]').first().click();
-    await page.click('button:has-text("Begin Adventure")');
+    // Character Selection is now handled during V2 Authentication registration,
+    // so it automatically skips this stage in the flow.
 
     // Wait for Island Flow to start (Arrival -> Title)
     // We should see the story event continue button eventually

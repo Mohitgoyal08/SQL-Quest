@@ -31,11 +31,9 @@ export default function IslandFlowOrchestrator({
   const currentStage = IslandFlowManager.getStage(islandId, stageIndex);
   
   const advanceStage = useCallback(() => {
-    console.log("advanceStage called! Current stageIndex:", stageIndex);
     setStageIndex(prev => {
       const flow = IslandFlowManager.getIslandFlow(islandId);
       if (!flow || prev >= flow.stages.length - 1) return prev;
-      console.log("Setting stageIndex to:", prev + 1);
       return prev + 1;
     });
   }, [stageIndex, islandId]);
@@ -111,7 +109,6 @@ export default function IslandFlowOrchestrator({
         <DialogueScene
           dialogue={QuestManager.getDialogueForNPC(IslandFlowManager.getIslandFlow(islandId).npcId, currentStage.id, progress)}
           onComplete={() => {
-            console.log("DIALOGUE onComplete triggered! Advancing stage...");
             setIsMissionActive(true);
             advanceStage();
           }}
@@ -142,7 +139,6 @@ export default function IslandFlowOrchestrator({
               setEarnedRewards(rewards);
               
               if (rewards?.item && typeof addItem === 'function') {
-                console.log("ADDING ITEM FROM FLOW:", rewards.item);
                 addItem(rewards.item);
               }
 

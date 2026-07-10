@@ -62,18 +62,18 @@ export default function SeaWorld({ progress, onTravelTo }) {
           return (
             <motion.div 
               key={island.id} 
-              className="absolute flex flex-col items-center" 
+              className={`absolute flex flex-col items-center ${isUnlocked ? 'cursor-pointer' : 'cursor-not-allowed'}`} 
               style={{ top: island.top, left: island.left, transform: 'translate(-50%, -50%)' }}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
+              onClick={() => handleIslandClick(island)}
             >
               <div 
-                onClick={() => handleIslandClick(island)}
                 className={`
                   relative flex items-center justify-center rounded-full
                   w-16 h-16 md:w-24 md:h-24 text-3xl md:text-5xl shadow-2xl transition-all
-                  ${isUnlocked ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-60 grayscale'}
+                  ${isUnlocked ? 'hover:scale-110' : 'opacity-60 grayscale'}
                   ${isCurrentLocation ? 'ring-4 ring-white bg-green-500' : (isUnlocked ? 'bg-[#8c6b3e] ring-2 ring-amber-300' : 'bg-slate-700')}
                 `}
               >

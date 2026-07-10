@@ -1,7 +1,7 @@
 import React from 'react';
 import HUD from './HUD';
 
-export default function MainGameLayout({ children, playerProfile, progress, worldState, hasSeaChart, onMapOpen }) {
+export default function MainGameLayout({ children, playerProfile, progress, worldState, hasSeaChart, onMapOpen, onLogout }) {
   return (
     <div className="relative w-screen h-screen bg-slate-950 flex flex-col justify-between overflow-hidden select-none font-sans">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b1d28] via-[#07141d] to-[#040c12] opacity-95 z-0 pointer-events-none" />
@@ -17,6 +17,7 @@ export default function MainGameLayout({ children, playerProfile, progress, worl
         currentNPC={worldState?.currentNPC || 'Captain Blackbeard'}
         hasSeaChart={hasSeaChart}
         onMapOpen={onMapOpen}
+        onLogout={onLogout}
         activeShipName={progress?.fleet?.activeShipId && progress?.fleet?.ships?.[progress.fleet.activeShipId] ? progress.fleet.ships[progress.fleet.activeShipId].name : null}
       />
 

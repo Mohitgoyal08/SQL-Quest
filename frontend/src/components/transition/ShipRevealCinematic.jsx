@@ -64,9 +64,10 @@ export default function ShipRevealCinematic({ onComplete }) {
                 AudioService.playClick();
                 setStep(2);
               }}
-              className="px-8 py-3.5 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg cursor-pointer"
+              className="px-8 py-3.5 bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white border-4 border-[#92400e] font-black text-sm uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-[0_6px_0_#92400e,0_10px_15px_rgba(0,0,0,0.3)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#92400e,0_4px_8px_rgba(0,0,0,0.3)]"
+              style={{ WebkitTextStroke: '1px #78350f' }}
             >
-              Step Forward ➔
+              <span className="drop-shadow-sm">Step Forward ➔</span>
             </button>
           </motion.div>
         )}
@@ -100,9 +101,9 @@ export default function ShipRevealCinematic({ onComplete }) {
                 AudioService.playClick();
                 setStep(3);
               }}
-              className="px-6 py-3 bg-[#8c6b3e] hover:bg-[#5c4424] text-[#fdf6e2] font-black text-xs uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
+              className="px-8 py-3 bg-gradient-to-b from-[#8c6b3e] to-[#5c4424] text-[#fdf6e2] border-4 border-[#433018] font-black text-sm uppercase tracking-widest rounded-2xl transition-all cursor-pointer shadow-[0_6px_0_#433018,0_10px_15px_rgba(0,0,0,0.3)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#433018,0_4px_8px_rgba(0,0,0,0.3)]"
             >
-              Claim the Deed
+              <span className="drop-shadow-sm">Claim the Deed</span>
             </button>
           </motion.div>
         )}
@@ -141,9 +142,10 @@ export default function ShipRevealCinematic({ onComplete }) {
               
               <button
                 type="submit"
-                className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-[0.98] cursor-pointer"
+                className="w-full py-4 bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-white border-4 border-[#92400e] font-black text-sm uppercase tracking-widest rounded-2xl transition-all shadow-[0_6px_0_#92400e,0_10px_15px_rgba(0,0,0,0.3)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#92400e,0_4px_8px_rgba(0,0,0,0.3)] cursor-pointer"
+                style={{ WebkitTextStroke: '1px #78350f' }}
               >
-                Inscribe the Name
+                <span className="drop-shadow-sm">Inscribe the Name</span>
               </button>
             </form>
           </motion.div>
@@ -239,9 +241,10 @@ export default function ShipRevealCinematic({ onComplete }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 2.2, duration: 0.5 }}
               onClick={handleSetSail}
-              className="mt-6 px-10 py-4 bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-900 font-black text-sm uppercase tracking-widest rounded-xl transition-all shadow-xl active:scale-95 cursor-pointer hover:shadow-amber-900/30"
+              className="mt-6 px-12 py-4 bg-gradient-to-b from-[#22c55e] to-[#16a34a] text-white border-4 border-[#14532d] font-black text-lg uppercase tracking-widest rounded-2xl transition-all shadow-[0_8px_0_#166534,0_15px_20px_rgba(0,0,0,0.4)] hover:scale-105 active:translate-y-2 active:shadow-[0_0px_0_#166534,0_5px_10px_rgba(0,0,0,0.4)] cursor-pointer"
+              style={{ WebkitTextStroke: '1px #14532d' }}
             >
-              ⚓ Set Sail
+              <span className="drop-shadow-sm">⚓ Set Sail</span>
             </motion.button>
           </motion.div>
         )}
