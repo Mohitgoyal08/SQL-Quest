@@ -3,7 +3,7 @@ import { SMUGGLERS_DIALOGUES } from '../dialogue/smugglersCove/dialogues';
 import { JUNGLE_DIALOGUES } from '../dialogue/jungleOfQueries/dialogues';
 import { CRYSTAL_DIALOGUES } from '../dialogue/crystalCaverns/dialogues';
 import { MERCHANT_DIALOGUES } from '../dialogue/merchantIsles/dialogues';
-import { SQL_CHALLENGES } from '../challenges';
+import { ContentService } from '../../services/ContentService';
 import { VOLCANO_DIALOGUES } from '../dialogue/volcanoIsland/dialogues';
 import { LOST_SEA_DIALOGUES } from '../dialogue/lostSea/dialogues';
 import { PIRATE_KINGS_DIALOGUES } from '../dialogue/pirateKingsShip/dialogues';
@@ -65,7 +65,7 @@ export class DialogueRepository {
 
     // 3. Ambient / Wrong NPC Check
     // If the player is talking to an NPC that isn't the active quest giver, give them ambient dialogue
-    const activeChallenge = SQL_CHALLENGES.find(c => c.id === challengeId);
+    const activeChallenge = ContentService.getChallenge(challengeId);
     if (activeChallenge && npcId && activeChallenge.npcId !== npcId) {
       if (npcId === 'quincy') {
         return [{ id: 'q1', speaker: 'Quartermaster Quincy', avatar: '👨‍✈️', text: 'I manage the cargo exchange. If you need guild clearance, talk to Master Marlowe first.' }];

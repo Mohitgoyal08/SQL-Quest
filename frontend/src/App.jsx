@@ -9,7 +9,9 @@ import { Toaster } from 'react-hot-toast';
 import { useAuth } from './context/AuthContext';
 import AuthLayout from './layouts/AuthLayout';
 import LoginPage from './pages/LoginPage';
+import AdminDashboard from './pages/AdminDashboard';
 import { apiClient } from './services/api';
+import { ContentService } from './services/ContentService';
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -18,11 +20,13 @@ export default function App() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [hasSynced, setHasSynced] = useState(false);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   // Sync profile and handle Cloud Save Migration when user auth state changes
   useEffect(() => {
     if (!user) {
       setHasSynced(false);
+      setContentLoaded(false);
       return;
     }
 
@@ -34,6 +38,9 @@ export default function App() {
         PlayerProfileService.saveProfile(profile);
         
         try {
+          await ContentService.fetchContent();
+          setContentLoaded(true);
+
           const hasMigrated = localStorage.getItem('sql_quest_v2_migrated');
           
           if (!hasMigrated && progress.level > 1) {
@@ -51,7 +58,7 @@ export default function App() {
             localStorage.setItem('sql_quest_v2_migrated', 'true');
           }
         } catch (e) {
-          console.error("Failed to sync progress with cloud:", e);
+          console.error("Failed to sync progress with cloud or load content:", e);
         } finally {
           setIsMigrating(false);
           setHasSynced(true);
@@ -66,10 +73,10 @@ export default function App() {
   // Derive world context purely from current progress state
   const worldState = WorldManager.getWorldState(progress);
 
-  if (loading || isMigrating || (user && !hasSynced)) {
+  if (loading || isMigrating || (user && (!hasSynced || !contentLoaded))) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-parchment-light font-display text-pirate-charcoal">
-        {loading ? 'Loading Ship Manifest...' : 'Synchronizing Cloud Save...'}
+        {loading ? 'Loading Ship Manifest...' : (contentLoaded ? 'Synchronizing Cloud Save...' : 'Loading Game Content...')}
       </div>
     );
   }
@@ -80,6 +87,11 @@ export default function App() {
         <LoginPage />
       </AuthLayout>
     );
+  }
+
+  const isAdminRoute = window.location.pathname === '/admin';
+  if (isAdminRoute) {
+    return <AdminDashboard />;
   }
 
   return (

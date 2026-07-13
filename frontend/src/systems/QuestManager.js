@@ -1,5 +1,5 @@
 import { DialogueRepository } from '../data/repositories/DialogueRepository';
-import { SQL_CHALLENGES } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 import { WorldManager } from './WorldManager';
 
 export class QuestManager {
@@ -26,7 +26,7 @@ export class QuestManager {
   }
 
   static getMissionForChallenge(challengeId) {
-    const challenge = this.getActiveChallenge(challengeId) || SQL_CHALLENGES[0] || {};
+    const challenge = this.getActiveChallenge(challengeId) || ContentService.getChallenges()[0] || {};
 
     return {
       id: challenge.id || 'unknown_challenge',
@@ -46,22 +46,24 @@ export class QuestManager {
   }
 
   static getActiveChallenge(challengeId) {
-    if (!challengeId || !Array.isArray(SQL_CHALLENGES) || SQL_CHALLENGES.length === 0) {
-      return SQL_CHALLENGES?.[0] || null;
+    const challenges = ContentService.getChallenges();
+    if (!challengeId || !Array.isArray(challenges) || challenges.length === 0) {
+      return challenges?.[0] || null;
     }
-    return SQL_CHALLENGES.find((c) => c.id === challengeId) || SQL_CHALLENGES[0] || null;
+    return ContentService.getChallenge(challengeId) || challenges[0] || null;
   }
 
   static getAllChallenges() {
-    return Array.isArray(SQL_CHALLENGES) ? SQL_CHALLENGES : [];
+    return ContentService.getChallenges();
   }
 
   static getNextQuest(currentChallengeId) {
-    if (!Array.isArray(SQL_CHALLENGES)) return null;
+    const challenges = ContentService.getChallenges();
+    if (!Array.isArray(challenges)) return null;
     
-    const current = SQL_CHALLENGES.find(c => c.id === currentChallengeId);
+    const current = ContentService.getChallenge(currentChallengeId);
     if (current && current.nextChallengeId) {
-      return SQL_CHALLENGES.find(c => c.id === current.nextChallengeId) || null;
+      return ContentService.getChallenge(current.nextChallengeId) || null;
     }
     return null;
   }

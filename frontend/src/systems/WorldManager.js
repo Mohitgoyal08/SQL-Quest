@@ -1,4 +1,4 @@
-import { SQL_CHALLENGES } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 
 export class WorldManager {
   /**
@@ -6,8 +6,8 @@ export class WorldManager {
    */
   static getWorldState(progress) {
     const activeChallenge =
-      SQL_CHALLENGES.find(c => c.id === progress.currentChallengeId) ||
-      SQL_CHALLENGES[0];
+      ContentService.getChallenge(progress.currentChallengeId) ||
+      ContentService.getChallenges()[0];
 
     return {
       currentIsland: activeChallenge.islandId || 'Tutorial Harbor',
@@ -23,10 +23,10 @@ export class WorldManager {
    */
   static isBetweenIslands(progress) {
     if (!progress.unlocks?.ship) return false;
-    const activeChallenge = SQL_CHALLENGES.find(c => c.id === progress.currentChallengeId) || SQL_CHALLENGES[0];
+    const activeChallenge = ContentService.getChallenge(progress.currentChallengeId) || ContentService.getChallenges()[0];
     
-    // Find the last challenge of the current island
-    const islandChallenges = SQL_CHALLENGES.filter(c => c.islandId === activeChallenge.islandId);
+    // Aggregate data for islands
+    const islandChallenges = ContentService.getChallenges().filter(c => c.islandId === activeChallenge.islandId);
     const lastChallenge = islandChallenges[islandChallenges.length - 1];
     
     return progress.completedIds.includes(lastChallenge.id);

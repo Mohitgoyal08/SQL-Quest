@@ -4,7 +4,7 @@
 import { SCENARIO_PRESETS } from './ScenarioLibrary';
 import { PlayerProfileService } from '../services/PlayerProfileService';
 import toast from 'react-hot-toast';
-import { SQL_CHALLENGES } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 import { FEATURES } from '../config/features';
 
 export class DevService {
@@ -74,7 +74,7 @@ export class DevService {
    * Performs standard challenge success pipeline for developers
    */
   static completeCurrentChallenge(progress, completeChallenge, addItem, setGameState) {
-    const currentChallenge = SQL_CHALLENGES.find(c => c.id === progress.currentChallengeId);
+    const currentChallenge = ContentService.getChallenge(progress.currentChallengeId);
     if (!currentChallenge) {
       toast.error('⚠️ Active challenge not found!');
       return;

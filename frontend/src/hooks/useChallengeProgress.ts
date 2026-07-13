@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SQL_CHALLENGES, ChallengeRewards } from '../data/challenges';
+import { ChallengeRewards } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 import { getStorageKey } from '../dev/DevStorage';
 import { apiClient, getAccessToken } from '../services/api';
 
@@ -40,13 +41,13 @@ const INITIAL_STATE: PlayerProgressState = {
   xp: 0,
   coins: 0,
   gems: 0,
-  currentIsland: SQL_CHALLENGES[0].islandId,
-  currentNPC: SQL_CHALLENGES[0].npcId,
+  currentIsland: ContentService.getChallenges()[0]?.islandId || 'tutorial_island',
+  currentNPC: ContentService.getChallenges()[0]?.npcId || 'captain_blackbeard',
   inventory: [],
   badges: [],
   completedIds: [],
-  unlockedIds: [SQL_CHALLENGES[0].id],
-  currentChallengeId: SQL_CHALLENGES[0].id,
+  unlockedIds: [ContentService.getChallenges()[0]?.id || 'chal_01'],
+  currentChallengeId: ContentService.getChallenges()[0]?.id || 'chal_01',
   unlocks: {
     seaChart: false,
     seaChartSeen: false,
@@ -123,16 +124,16 @@ export function useChallengeProgress() {
 
       // Do not automatically advance location/NPC if moving to a DIFFERENT island!
       // The player must use the map to travel.
-      const currentMeta = SQL_CHALLENGES.find(c => c.id === challengeId);
+      const currentMeta = ContentService.getChallenge(challengeId);
       let activeChallengeId = nextId || challengeId;
       if (nextId) {
-        const nextMeta = SQL_CHALLENGES.find(c => c.id === nextId);
+        const nextMeta = ContentService.getChallenge(nextId);
         if (nextMeta && currentMeta && nextMeta.islandId !== currentMeta.islandId) {
           activeChallengeId = challengeId; // Stay on the current challenge/island until they manually travel!
         }
       }
 
-      const nextChallengeMeta = SQL_CHALLENGES.find(c => c.id === activeChallengeId);
+      const nextChallengeMeta = ContentService.getChallenge(activeChallengeId);
 
       const nextUnlocks = { ...prev.unlocks };
       const nextFleet = { ...prev.fleet };
@@ -179,7 +180,7 @@ export function useChallengeProgress() {
   const selectChallenge = useCallback((challengeId: string) => {
     setProgress((prev) => {
       if (!prev.unlockedIds.includes(challengeId)) return prev;
-      const meta = SQL_CHALLENGES.find(c => c.id === challengeId);
+      const meta = ContentService.getChallenge(challengeId);
       return {
         ...prev,
         currentChallengeId: challengeId,

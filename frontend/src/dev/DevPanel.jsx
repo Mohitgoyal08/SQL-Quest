@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GAME_STATES } from '../config/gameStates';
-import { SQL_CHALLENGES } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 import { ITEM_CATALOG } from '../inventory/data/ItemCatalog';
 import { SCENARIO_PRESETS } from './ScenarioLibrary';
 import { DevService } from './DevService';
@@ -29,7 +29,7 @@ export default function DevPanel({
   const [activeTab, setActiveTab] = useState('diagnostics');
 
   const uniqueIslands = useMemo(() => {
-    return Array.from(new Set(SQL_CHALLENGES.map(c => c.islandId).filter(Boolean)));
+    return Array.from(new Set(ContentService.getChallenges().map(c => c.islandId).filter(Boolean)));
   }, []);
 
   const handleResetSave = () => {

@@ -1,7 +1,7 @@
 /**
  * ScenarioLibrary - Predefined game states for dev panel quick loading
  */
-import { SQL_CHALLENGES } from '../data/challenges';
+import { ContentService } from '../services/ContentService';
 
 const INITIAL_STATE = {
   level: 1,
