@@ -3,10 +3,10 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+from app.core.config import settings
 
-# We will use SQLite for initial dev until Postgres is fully set up
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_quest.db")
+# We will load the database url configured through app config settings
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # SQLite needs connect_args={"check_same_thread": False}
 connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
