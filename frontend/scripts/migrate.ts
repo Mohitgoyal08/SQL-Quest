@@ -19,7 +19,7 @@ const MASTER_DIALOGUE_REGISTRY = {
   ...PIRATE_KINGS_DIALOGUES,
 };
 
-const BASE_URL = 'http://localhost:8000/api/v1';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8000/api/v1';
 
 async function migrate() {
     console.log("Authenticating as admin...");
