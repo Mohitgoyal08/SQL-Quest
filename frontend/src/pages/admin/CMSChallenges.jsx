@@ -78,6 +78,7 @@ export default function CMSChallenges() {
       sql_concept: '',
       expected_sql: 'SELECT * FROM ;',
       validation_type: 'EXACT_MATCH',
+      solution: 'SELECT * FROM ;',
       is_active: true,
       order_index: challenges.length,
       hint: '',
@@ -155,8 +156,38 @@ export default function CMSChallenges() {
             <textarea className="mt-1 w-full border rounded p-2" rows="3" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
           <div className="col-span-2 font-mono">
-            <label className="block text-sm font-medium text-gray-700">Expected SQL</label>
-            <textarea className="mt-1 w-full border rounded p-2 bg-gray-50" rows="3" value={formData.expected_sql || ''} onChange={e => setFormData({...formData, expected_sql: e.target.value})} />
+            <label className="block text-sm font-medium text-gray-700">Expected SQL (Validation Value)</label>
+            <textarea className="mt-1 w-full border rounded p-2 bg-gray-50" rows="2" value={formData.expected_sql || ''} onChange={e => setFormData({...formData, expected_sql: e.target.value})} />
+          </div>
+          <div className="col-span-2 font-mono">
+            <label className="block text-sm font-medium text-gray-700">Solution (Canonical Executable Reference Query)</label>
+            <textarea className="mt-1 w-full border rounded p-2 bg-gray-50" rows="2" value={formData.solution || ''} onChange={e => setFormData({...formData, solution: e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Difficulty</label>
+            <select className="mt-1 w-full border rounded p-2" value={formData.difficulty || 'Medium'} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+              <option value="Boss">Boss</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Validation Type</label>
+            <select className="mt-1 w-full border rounded p-2" value={formData.validation_type || 'EXACT_MATCH'} onChange={e => setFormData({...formData, validation_type: e.target.value})}>
+              <option value="EXACT_MATCH">Exact Match</option>
+              <option value="CONTAINS">Contains</option>
+              <option value="KEYWORD_MATCH">Keyword Match</option>
+              <option value="REGEX">Regex</option>
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700">Hint 1</label>
+            <input type="text" className="mt-1 w-full border rounded p-2" value={formData.hint || ''} onChange={e => setFormData({...formData, hint: e.target.value})} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700">Hint 2</label>
+            <input type="text" className="mt-1 w-full border rounded p-2" value={formData.hint_2 || ''} onChange={e => setFormData({...formData, hint_2: e.target.value})} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Order Index</label>
@@ -188,27 +219,57 @@ export default function CMSChallenges() {
             <label className="block text-sm font-medium text-gray-700">Diamonds</label>
             <input type="number" className="mt-1 w-full border rounded p-2" value={rewardData.diamonds || 0} onChange={e => setRewardData({...rewardData, diamonds: parseInt(e.target.value)})} />
           </div>
+          <div className="col-span-1">
+            <label className="block text-sm font-medium text-gray-700">Item Drop ID (Optional)</label>
+            <input type="text" className="mt-1 w-full border rounded p-2" value={rewardData.items?.reward_item || ''} onChange={e => setRewardData({...rewardData, items: { reward_item: e.target.value }})} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700">Achievement Badge ID (Optional)</label>
+            <input type="text" className="mt-1 w-full border rounded p-2" value={rewardData.achievement || ''} onChange={e => setRewardData({...rewardData, achievement: e.target.value})} />
+          </div>
         </div>
 
-        <h3 className="text-xl font-bold mb-4 border-t pt-4">Dialogue (Intro)</h3>
-        {dialogueData.map((diag, idx) => (
-          <div key={idx} className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Dialogue Lines (JSON Array format)</label>
-            <textarea 
-              className="mt-1 w-full border rounded p-2 font-mono text-sm" 
-              rows="4" 
-              value={JSON.stringify(diag.dialogue_text, null, 2)} 
-              onChange={e => {
-                try {
-                  const newText = JSON.parse(e.target.value);
-                  const newData = [...dialogueData];
-                  newData[idx].dialogue_text = newText;
-                  setDialogueData(newData);
-                } catch(err) {
-                  // Wait for valid JSON
-                }
-              }} 
-            />
+        <h3 className="text-xl font-bold mb-4 border-t pt-4">NPC Dialogue Lines</h3>
+        {dialogueData.map((diag, diagIdx) => (
+          <div key={diagIdx} className="mb-4 bg-gray-50 p-4 rounded border">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-bold text-gray-700">Dialogue Set {diagIdx + 1}</label>
+            </div>
+            {(diag.dialogue_text || []).map((line, lineIdx) => (
+              <div key={lineIdx} className="flex gap-2 mb-2">
+                <input 
+                  type="text" 
+                  className="w-full border rounded p-2" 
+                  value={line} 
+                  onChange={e => {
+                    const newData = [...dialogueData];
+                    newData[diagIdx].dialogue_text[lineIdx] = e.target.value;
+                    setDialogueData(newData);
+                  }}
+                />
+                <button 
+                  onClick={() => {
+                    const newData = [...dialogueData];
+                    newData[diagIdx].dialogue_text.splice(lineIdx, 1);
+                    setDialogueData(newData);
+                  }}
+                  className="px-3 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+            <button 
+              onClick={() => {
+                const newData = [...dialogueData];
+                if (!newData[diagIdx].dialogue_text) newData[diagIdx].dialogue_text = [];
+                newData[diagIdx].dialogue_text.push("");
+                setDialogueData(newData);
+              }}
+              className="mt-2 text-sm text-blue-600 font-bold hover:underline"
+            >
+              + Add Line
+            </button>
           </div>
         ))}
 

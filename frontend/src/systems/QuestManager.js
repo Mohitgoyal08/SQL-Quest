@@ -1,14 +1,13 @@
-import { DialogueRepository } from '../data/repositories/DialogueRepository';
 import { ContentService } from '../services/ContentService';
 import { WorldManager } from './WorldManager';
 
 export class QuestManager {
   /**
-   * Delegates dialogue lookup directly to the scalable DialogueRepository.
+   * Delegates dialogue lookup directly to the scalable ContentService.
    * Evaluates requirements if the dialogue uses the reactive branch schema.
    */
   static getDialogueForNPC(npcId, challengeId, progress) {
-    const rawDialogue = DialogueRepository.getDialogue(npcId, challengeId);
+    const rawDialogue = ContentService.getDialogue(npcId, challengeId, progress);
     
     // Check if this is the new reactive branched schema
     if (Array.isArray(rawDialogue) && rawDialogue.length > 0 && rawDialogue[0].dialogue) {

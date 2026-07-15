@@ -2,17 +2,18 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { WorldManager } from '../../../systems/WorldManager';
 import { AudioService } from '../../../services/AudioService';
+import { QuestManager } from '../../../systems/QuestManager';
 
 // Use same percentages as WorldReveal for consistency
 const ISLANDS_MANIFEST = [
-  { id: 'tutorial_island', name: 'Tutorial Harbor', top: '70%', left: '15%', glowing: true, requirements: null, icon: '⚓' },
-  { id: 'merchant_isles', name: 'Merchant Isles', top: '45%', left: '25%', glowing: false, requirements: { requiresShip: true }, icon: '🪙' },
-  { id: 'smugglers_cove', name: "Smuggler's Cove", top: '35%', left: '40%', glowing: false, requirements: { requiredChallengeId: 'merchant_02' }, icon: '☠️' },
-  { id: 'jungle_queries', name: 'Jungle of Queries', top: '55%', left: '50%', glowing: false, requirements: { requiredChallengeId: 'smugglers_03' }, icon: '🌴' },
-  { id: 'crystal_caverns', name: 'Crystal Caverns', top: '40%', left: '65%', glowing: false, requirements: { requiredChallengeId: 'jungle_03' }, icon: '🔮' },
-  { id: 'volcano_island', name: 'Volcano Island', top: '25%', left: '75%', glowing: false, requirements: { requiredChallengeId: 'crystal_03' }, icon: '🌋' },
-  { id: 'lost_sea', name: 'Lost Sea', top: '65%', left: '80%', glowing: false, requirements: { requiredChallengeId: 'volcano_02' }, icon: '🌊' },
-  { id: 'pirate_kings_ship', name: "Pirate King's Ship", top: '30%', left: '90%', glowing: false, requirements: { requiredChallengeId: 'lost_sea_02' }, icon: '👑' },
+  { id: 'tutorial_island', name: 'Tutorial Harbor', top: '70%', left: '15%', glowing: true, icon: '⚓' },
+  { id: 'merchant_isles', name: 'Merchant Isles', top: '45%', left: '25%', glowing: false, icon: '🪙' },
+  { id: 'smugglers_cove', name: "Smuggler's Cove", top: '35%', left: '40%', glowing: false, icon: '☠️' },
+  { id: 'jungle_queries', name: 'Jungle of Queries', top: '55%', left: '50%', glowing: false, icon: '🌴' },
+  { id: 'crystal_caverns', name: 'Crystal Caverns', top: '40%', left: '65%', glowing: false, icon: '🔮' },
+  { id: 'volcano_island', name: 'Volcano Island', top: '25%', left: '75%', glowing: false, icon: '🌋' },
+  { id: 'lost_sea', name: 'Lost Sea', top: '65%', left: '80%', glowing: false, icon: '🌊' },
+  { id: 'pirate_kings_ship', name: "Pirate King's Ship", top: '30%', left: '90%', glowing: false, icon: '👑' },
 ];
 
 export default function SeaWorld({ progress, onTravelTo }) {
@@ -24,11 +25,8 @@ export default function SeaWorld({ progress, onTravelTo }) {
   }, []);
 
   const handleIslandClick = (island) => {
-    const isUnlocked = WorldManager.checkRequirements(island.requirements, progress);
-    const isCurrentLocation = island.id === currentIslandId;
-    
-    if (isCurrentLocation) return;
-
+    const isUnlocked = WorldManager.isIslandUnlocked(island.id, progress);
+ 
     if (isUnlocked && typeof onTravelTo === 'function') {
       AudioService.playClick();
       onTravelTo(island.id);
@@ -56,7 +54,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
 
         {/* Islands */}
         {ISLANDS_MANIFEST.map((island) => {
-          const isUnlocked = WorldManager.checkRequirements(island.requirements, progress);
+          const isUnlocked = WorldManager.isIslandUnlocked(island.id, progress);
           const isCurrentLocation = island.id === currentIslandId;
 
           return (
@@ -100,6 +98,20 @@ export default function SeaWorld({ progress, onTravelTo }) {
               <span className={`mt-3 font-bold text-sm md:text-lg text-center tracking-wide filter drop-shadow-md ${isUnlocked ? 'text-white' : 'text-slate-300'}`}>
                 {island.name}
               </span>
+              {(() => {
+                const islandChallenges = QuestManager.getAllChallenges().filter(c => c.islandId === island.id);
+                const total = islandChallenges.length;
+                if (isUnlocked && total > 0) {
+                  const completed = islandChallenges.filter(c => progress.completedIds.includes(c.id)).length;
+                  const pct = Math.round((completed / total) * 100);
+                  return (
+                    <span className="block text-xs font-semibold text-amber-300 drop-shadow mt-0.5">
+                      {completed}/{total} ({pct}%)
+                    </span>
+                  );
+                }
+                return null;
+              })()}
             </motion.div>
           );
         })}

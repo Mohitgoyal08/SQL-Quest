@@ -15,7 +15,7 @@ import { ContentService } from './services/ContentService';
 
 export default function App() {
   const { user, loading, logout } = useAuth();
-  const { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress } = useChallengeProgress();
+  const { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress, resumeChallenge } = useChallengeProgress();
   const [playerProfile, setPlayerProfile] = useState(() => PlayerProfileService.loadProfile());
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
@@ -109,6 +109,7 @@ export default function App() {
           progress={progress}
           completeChallenge={completeChallenge}
           selectChallenge={selectChallenge}
+          resumeChallenge={resumeChallenge}
           worldState={worldState}
           onProfileChange={setPlayerProfile}
           isMapOpen={isMapOpen}

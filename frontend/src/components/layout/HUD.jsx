@@ -78,7 +78,20 @@ export default function HUD({
       {/* Right Stats: Level, XP, Currencies */}
       <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
         
-        {/* Level / XP block */}
+        {/* Currencies & XP Pill */}
+        <div className="flex items-center gap-4 bg-slate-900/60 px-4 py-1.5 rounded-xl border border-[#8c6b3e]/40 text-[#ebd9b4] text-xs font-black shadow-inner select-none shrink-0">
+          <span className="flex items-center gap-1.5">
+            <span className="text-amber-500">🛡️</span> XP {xp}
+          </span>
+          <span className="flex items-center gap-1.5 border-l border-[#8c6b3e]/30 pl-4">
+            <span className="text-amber-400">🪙</span> {coins}
+          </span>
+          <span className="flex items-center gap-1.5 border-l border-[#8c6b3e]/30 pl-4">
+            <span className="text-purple-400">💎</span> {gems}
+          </span>
+        </div>
+
+        {/* Level & Progress Bar */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-right">
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8c6b3e]">Lvl</span>
@@ -87,26 +100,13 @@ export default function HUD({
           <div className="w-24 sm:w-32 bg-slate-900/80 rounded-full h-3 relative overflow-hidden border border-[#8c6b3e]/30 shadow-inner">
             <div 
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000 ease-out relative overflow-hidden" 
-              style={{ width: `${Math.min(100, Math.max(0, (xp % 100)))}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, ((xp % 300) / 300) * 100))}%` }}
             >
                {/* Pulsing light sweep over XP bar */}
                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             </div>
           </div>
         </div>
-
-        {FEATURES.ENABLE_ECONOMY && (
-          <div className="flex items-center gap-4 bg-slate-900/40 px-4 py-1.5 rounded-full border border-[#8c6b3e]/20 text-[#ebd9b4]">
-            <span className="text-sm font-bold flex items-center gap-1.5">
-              <span className="text-amber-400">🪙</span> {coins}
-            </span>
-            {gems > 0 && (
-              <span className="text-purple-400 flex items-center gap-1.5">
-                💎 {gems}
-              </span>
-            )}
-          </div>
-        )}
       </div>
     </header>
   );

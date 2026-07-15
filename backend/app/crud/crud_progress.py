@@ -7,7 +7,33 @@ from app.schemas.progress import PlayerProgressState
 def get_progress(db: Session, user_id: UUID) -> Optional[PlayerProgressState]:
     progress = db.query(PlayerProgress).filter(PlayerProgress.user_id == user_id).first()
     if not progress:
-        return None
+        progress = PlayerProgress(
+            user_id=user_id,
+            level=1,
+            xp=0,
+            coins=0,
+            gems=0,
+            current_island="tutorial_island",
+            current_npc="captain_blackbeard",
+            current_challenge_id="chal_01",
+            inventory=[],
+            badges=[],
+            unlocked_ids=["chal_01"],
+            unlocks={
+                "seaChart": False,
+                "seaChartSeen": False,
+                "ship": False,
+                "merchantIslesVoyaged": False,
+            },
+            fleet={
+                "activeShipId": None,
+                "ownedShipIds": [],
+                "ships": {}
+            }
+        )
+        db.add(progress)
+        db.commit()
+        db.refresh(progress)
     
     # We should reconstruct PlayerProgressState
     # `completedIds` are stored separately in `completed_challenges` if we strictly normalize, 

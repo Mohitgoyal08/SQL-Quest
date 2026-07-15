@@ -150,6 +150,7 @@ export default function LoginPage() {
                 if (errors.email) setErrors({ ...errors, email: '' });
               }}
               placeholder="captain@sqlquest.com"
+              style={{ paddingLeft: '3.25rem' }}
               className={`w-full pl-11 pr-4 py-3 bg-white/80 rounded-2xl border-2 transition-all shadow-inner font-medium text-sm text-pirate-charcoal placeholder:text-pirate-leather/40 select-text focus:outline-none ${
                 errors.email 
                   ? 'border-pirate-crimson bg-pirate-crimson/5 focus:border-pirate-crimson' 
@@ -185,6 +186,7 @@ export default function LoginPage() {
                 if (errors.password) setErrors({ ...errors, password: '' });
               }}
               placeholder="••••••••••••"
+              style={{ paddingLeft: '3.25rem' }}
               className={`w-full pl-11 pr-12 py-3 bg-white/80 rounded-2xl border-2 transition-all shadow-inner font-medium text-sm text-pirate-charcoal placeholder:text-pirate-leather/40 select-text focus:outline-none ${
                 errors.password 
                   ? 'border-pirate-crimson bg-pirate-crimson/5 focus:border-pirate-crimson' 

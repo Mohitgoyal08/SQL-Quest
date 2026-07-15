@@ -9,6 +9,16 @@ export class WorldManager {
       ContentService.getChallenge(progress.currentChallengeId) ||
       ContentService.getChallenges()[0];
 
+    if (!activeChallenge) {
+      return {
+        currentIsland: 'Tutorial Harbor',
+        currentNPC: 'Captain Blackbeard',
+        currentChapter: 1,
+        currentQuestId: 'chal_01',
+        unlockedIslands: ['Tutorial Harbor']
+      };
+    }
+
     return {
       currentIsland: activeChallenge.islandId || 'Tutorial Harbor',
       currentNPC: activeChallenge.npcId || 'Captain Blackbeard',
@@ -24,12 +34,9 @@ export class WorldManager {
   static isBetweenIslands(progress) {
     if (!progress.unlocks?.ship) return false;
     const activeChallenge = ContentService.getChallenge(progress.currentChallengeId) || ContentService.getChallenges()[0];
+    if (!activeChallenge) return false;
     
-    // Aggregate data for islands
-    const islandChallenges = ContentService.getChallenges().filter(c => c.islandId === activeChallenge.islandId);
-    const lastChallenge = islandChallenges[islandChallenges.length - 1];
-    
-    return progress.completedIds.includes(lastChallenge.id);
+    return this.isIslandCompleted(activeChallenge.islandId, progress);
   }
 
   /**
@@ -159,5 +166,64 @@ export class WorldManager {
       normalizedReqs,
       progress
     );
+  }
+
+  static isIslandCompleted(islandId, progress) {
+    const challenges = ContentService.getChallenges().filter(c => c.islandId === islandId);
+    if (challenges.length === 0) return false;
+    return challenges.every(c => progress.completedIds.includes(c.id));
+  }
+
+  static isIslandUnlocked(islandId, progress) {
+    const islands = ContentService.getIslands();
+    if (!Array.isArray(islands) || islands.length === 0) return true;
+
+    const firstIsland = islands[0];
+    if (islandId === firstIsland.id) return true;
+
+    // If the island is the player's current island, it is unlocked
+    if (progress.currentIsland === islandId) return true;
+
+    const currentIdx = islands.findIndex(i => i.id === progress.currentIsland);
+    const idx = islands.findIndex(i => i.id === islandId);
+    if (idx < 0) return false;
+
+    // If the player is currently on a subsequent island in the chain, preceding islands must be unlocked
+    if (currentIdx >= idx) return true;
+
+    // Otherwise evaluate completion of preceding islands
+    for (let i = 0; i < idx; i++) {
+      if (!this.isIslandCompleted(islands[i].id, progress)) {
+        return false;
+      }
+    }
+
+    const targetIsland = islands[idx];
+    if (targetIsland.unlock_requirements) {
+      const reqs = typeof targetIsland.unlock_requirements === 'string'
+        ? JSON.parse(targetIsland.unlock_requirements)
+        : targetIsland.unlock_requirements;
+      return this.evaluateCustomRequirements(reqs, progress);
+    }
+
+    return true;
+  }
+
+  static evaluateCustomRequirements(requirements, progress) {
+    if (!requirements) return true;
+
+    if (requirements.requires_ship && !progress?.unlocks?.ship) {
+      return false;
+    }
+
+    if (requirements.required_item && !progress?.inventory?.includes(requirements.required_item)) {
+      return false;
+    }
+
+    if (requirements.required_challenge_id && !progress?.completedIds?.includes(requirements.required_challenge_id)) {
+      return false;
+    }
+
+    return true;
   }
 } 

@@ -22,9 +22,11 @@ export default function IslandFlowOrchestrator({
   addItem,
   onFlowComplete, // When departure happens
   onTriggerCinematic,
-  onProfileChange
+  onProfileChange,
+  onReturnToSea
 }) {
   const [stageIndex, setStageIndex] = useState(() => IslandFlowManager.getInitialStageIndex(islandId, progress));
+  const [selectedChallengeId, setSelectedChallengeId] = useState(null);
   const [isMissionActive, setIsMissionActive] = useState(false);
   const [earnedRewards, setEarnedRewards] = useState(null);
   
@@ -37,6 +39,10 @@ export default function IslandFlowOrchestrator({
       return prev + 1;
     });
   }, [stageIndex, islandId]);
+
+  useEffect(() => {
+    setSelectedChallengeId(null);
+  }, [stageIndex]);
 
   useEffect(() => {
     if (currentStage?.type === 'ARRIVAL') {
@@ -131,10 +137,16 @@ export default function IslandFlowOrchestrator({
           <ChallengeSidebar
             challenges={QuestManager.getAllChallenges().filter(c => c.islandId === islandId)}
             progress={progress}
-            onSelect={selectChallenge}
+            onSelect={(id) => {
+              setSelectedChallengeId(id);
+              if (typeof selectChallenge === 'function') {
+                selectChallenge(id);
+              }
+            }}
+            onReturnToSea={onReturnToSea}
           />
           <ChallengePanel
-            challenge={QuestManager.getActiveChallenge(currentStage.id)}
+            challenge={QuestManager.getActiveChallenge(selectedChallengeId || currentStage.id)}
             onSuccess={(id, rewards, nextId) => {
               setEarnedRewards(rewards);
               
@@ -145,10 +157,14 @@ export default function IslandFlowOrchestrator({
               // Handle completion logic
               completeChallenge(id, rewards, nextId);
               
-              if (id === 'chal_01') {
+              const tutorialChallenges = QuestManager.getAllChallenges().filter(c => c.islandId === 'tutorial_island');
+              const firstTutorialChallenge = tutorialChallenges[0];
+              const lastTutorialChallenge = tutorialChallenges[tutorialChallenges.length - 1];
+
+              if (firstTutorialChallenge && id === firstTutorialChallenge.id) {
                 toast.success("🗺️ Weathered Sea Chart unlocked! Check your map.");
               }
-              if (id === 'chal_06' && onTriggerCinematic) {
+              if (lastTutorialChallenge && id === lastTutorialChallenge.id && onTriggerCinematic) {
                 onTriggerCinematic('ship');
               }
 

@@ -206,6 +206,42 @@ export const ChallengePanel: React.FC<ChallengePanelProps> = ({
           />
         </div>
 
+        {/* Bounty Reward Preview Banner */}
+        {challenge.rewards && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-[#ebd9b4]/25 border-2 border-dashed border-[#8c6b3e]/40 rounded-xl mb-4 select-none">
+            <div className="flex-1 w-full">
+              <span className="text-[10px] font-black text-[#8c6b3e] uppercase tracking-wider block mb-2">
+                Bounty Reward Preview
+              </span>
+              <div className="flex flex-wrap gap-2.5">
+                <div className="flex items-center gap-2 bg-[#ebd9b4] border border-[#8c6b3e]/40 px-3 py-1.5 rounded-lg shadow-sm">
+                  <span className="bg-[#5c4424] text-[#ebd9b4] text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm leading-none">XP</span>
+                  <span className="font-extrabold text-[#5c4424] text-xs">+{challenge.rewards.xp} XP</span>
+                </div>
+                {challenge.rewards.coins > 0 && (
+                  <div className="flex items-center gap-2 bg-[#ebd9b4] border border-[#8c6b3e]/40 px-3 py-1.5 rounded-lg shadow-sm">
+                    <span className="text-sm leading-none">🪙</span>
+                    <span className="font-extrabold text-[#5c4424] text-xs">+{challenge.rewards.coins} Gold</span>
+                  </div>
+                )}
+                {challenge.rewards.gems && challenge.rewards.gems > 0 ? (
+                  <div className="flex items-center gap-2 bg-[#ebd9b4] border border-[#8c6b3e]/40 px-3 py-1.5 rounded-lg shadow-sm">
+                    <span className="text-sm leading-none">💎</span>
+                    <span className="font-extrabold text-[#5c4424] text-xs">+{challenge.rewards.gems} Gems</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2.5 md:border-l md:border-[#8c6b3e]/30 md:pl-4 min-w-[200px] w-full md:w-auto">
+              <span className="text-xl">💀</span>
+              <p className="text-[9px] font-black text-amber-900/80 uppercase tracking-widest leading-relaxed">
+                Complete the challenge to claim these rewards!
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Action Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 select-none">
           <div className="flex items-center gap-2">

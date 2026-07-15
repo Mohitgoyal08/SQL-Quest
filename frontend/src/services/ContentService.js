@@ -1,28 +1,31 @@
 import { apiClient } from './api';
-import { SQL_CHALLENGES } from '../data/challenges';
-import { DialogueRepository } from '../data/repositories/DialogueRepository';
 
 class ContentServiceImpl {
   constructor() {
-    this.challenges = [...SQL_CHALLENGES];
+    this.challenges = [];
     this.rewards = [];
     this.dialogues = [];
+    this.islands = [];
     this.isLoaded = false;
   }
 
   async fetchContent() {
     if (this.isLoaded) return;
     try {
-      const [chalRes, rewRes, diagRes] = await Promise.all([
+      const [chalRes, rewRes, diagRes, islRes] = await Promise.all([
         apiClient.get('/content/challenges'),
         apiClient.get('/content/rewards'),
-        apiClient.get('/content/dialogues')
+        apiClient.get('/content/dialogues'),
+        apiClient.get('/content/islands')
       ]);
 
-      if (chalRes.data && chalRes.data.length > 0) {
-        this.challenges = chalRes.data.map(backendChallenge => {
+      if (chalRes.data) {
+        // Only active challenges for gameplay
+        const activeChallenges = chalRes.data.filter(c => c.is_active);
+        
+        this.challenges = activeChallenges.map(backendChallenge => {
           // Map backend schema to frontend SQLChallenge schema
-          const challengeRewards = rewRes.data.filter(r => r.challenge_id === backendChallenge.id);
+          const challengeRewards = (rewRes.data || []).filter(r => r.challenge_id === backendChallenge.id);
           const mappedRewards = {};
           if (challengeRewards.length > 0) {
             const primaryReward = challengeRewards[0];
@@ -50,13 +53,13 @@ class ContentServiceImpl {
             npcId: backendChallenge.npc,
             description: backendChallenge.description || '',
             story: '', // Optional fallback story text
-            difficulty: backendChallenge.difficulty,
+            difficulty: backendChallenge.difficulty || 'Medium',
             validation: {
-              type: backendChallenge.validation_type === 'EXACT_MATCH' ? 'EXACT' : backendChallenge.validation_type,
+              type: backendChallenge.validation_type === 'EXACT_MATCH' ? 'EXACT' : (backendChallenge.validation_type || 'EXACT'),
               expected: backendChallenge.expected_sql
             },
             starterCode: backendChallenge.seed_data?.starter_code || 'SELECT * FROM ',
-            referenceQuery: backendChallenge.expected_sql,
+            referenceQuery: backendChallenge.solution || backendChallenge.expected_sql,
             hints: hints,
             rewards: mappedRewards,
             nextChallengeId: null // We will calculate this based on order_index later
@@ -66,21 +69,27 @@ class ContentServiceImpl {
         // Wire up nextChallengeId based on order_index mapping within same island
         this.challenges.forEach(challenge => {
             const islandChallenges = this.challenges.filter(c => c.islandId === challenge.islandId);
-            const sorted = islandChallenges.sort((a, b) => a.order_index - b.order_index);
-            const idx = sorted.findIndex(c => c.id === challenge.id);
-            if (idx >= 0 && idx < sorted.length - 1) {
-                challenge.nextChallengeId = sorted[idx + 1].id;
+            // Re-find the original backend objects to get order_index for sorting
+            const originalIslandChallenges = activeChallenges.filter(c => c.island_id === challenge.islandId);
+            originalIslandChallenges.sort((a, b) => a.order_index - b.order_index);
+            
+            const idx = originalIslandChallenges.findIndex(c => c.id === challenge.id);
+            if (idx >= 0 && idx < originalIslandChallenges.length - 1) {
+                challenge.nextChallengeId = originalIslandChallenges[idx + 1].id;
             }
         });
       }
 
-      if (diagRes.data && diagRes.data.length > 0) {
+      if (diagRes.data) {
         this.dialogues = diagRes.data;
+      }
+      if (islRes.data) {
+        this.islands = islRes.data.sort((a, b) => a.order_index - b.order_index);
       }
       this.isLoaded = true;
     } catch (e) {
-      console.warn("Failed to fetch CMS content. Falling back to static assets.", e);
-      // Keep static arrays
+      console.error("Failed to fetch CMS content. Game cannot start properly.", e);
+      // DB is the only source of truth. Game should fail to load correctly or show empty.
       this.isLoaded = true;
     }
   }
@@ -107,6 +116,14 @@ class ContentServiceImpl {
     return this.challenges.find(c => c.id === id) || null;
   }
 
+  getIslands() {
+    return this.islands;
+  }
+
+  getIsland(id) {
+    return this.islands.find(i => i.id === id) || null;
+  }
+
   getDialogue(npcId, challengeId, progress) {
     // Check if backend has dialogues for this challenge/npc
     const backendDiags = this.dialogues.filter(d => d.challenge_id === challengeId && d.npc_id === npcId);
@@ -119,8 +136,13 @@ class ContentServiceImpl {
       }));
     }
     
-    // Fallback to legacy static dialogue repository
-    return DialogueRepository.getDialogue(npcId, challengeId, progress);
+    // No fallback anymore. If it's not in DB, it doesn't exist.
+    return [{
+        id: 'error_node',
+        speaker: 'System',
+        avatar: '⚠️',
+        text: '...'
+    }];
   }
 }
 

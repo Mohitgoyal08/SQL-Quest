@@ -8,12 +8,14 @@ interface ChallengeSidebarProps {
   challenges: SQLChallenge[];
   progress: PlayerProgressState;
   onSelect: (id: string) => void;
+  onReturnToSea?: () => void;
 }
 
 export const ChallengeSidebar: React.FC<ChallengeSidebarProps> = ({
   challenges,
   progress,
   onSelect,
+  onReturnToSea,
 }) => {
   const {
     isUnlocked: checkUnlocked,
@@ -31,12 +33,22 @@ export const ChallengeSidebar: React.FC<ChallengeSidebarProps> = ({
           </h2>
 
           <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-1.5 bg-[#ebd9b4] px-2.5 py-1 rounded border border-[#8c6b3e]/40 shadow-inner">
-              <span className="text-amber-600 font-black text-xs">★</span>
-              <span className="font-extrabold text-[#5c4424] text-xs">
-                {progress.xp} XP
-              </span>
-            </div>
+            {onReturnToSea ? (
+              <button
+                type="button"
+                onClick={onReturnToSea}
+                className="flex items-center gap-1.5 bg-[#8c1c1c] hover:bg-red-800 border border-[#8c6b3e]/40 shadow-inner px-2 py-0.5 rounded text-white font-extrabold text-xs transition-colors cursor-pointer select-none"
+              >
+                ⛵ Return to Sea
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5 bg-[#ebd9b4] px-2.5 py-1 rounded border border-[#8c6b3e]/40 shadow-inner">
+                <span className="text-amber-600 font-black text-xs">★</span>
+                <span className="font-extrabold text-[#5c4424] text-xs">
+                  {progress.xp} XP
+                </span>
+              </div>
+            )}
 
             <div className="flex items-center gap-1.5 bg-[#ebd9b4] px-2.5 py-1 rounded border border-[#8c6b3e]/40 shadow-inner">
               <span className="text-yellow-600 font-black text-xs">🪙</span>

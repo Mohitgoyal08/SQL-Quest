@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Ensure this matches the backend URL
-export const API_BASE_URL = 'http://localhost:8000/api/v1';
+export const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1')
+  : 'http://localhost:8000/api/v1';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

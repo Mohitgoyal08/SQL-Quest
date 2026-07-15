@@ -138,11 +138,15 @@ export function useChallengeProgress() {
       const nextUnlocks = { ...prev.unlocks };
       const nextFleet = { ...prev.fleet };
 
-      if (challengeId === 'chal_01') {
+      const tutorialChallenges = ContentService.getChallenges().filter(c => c.islandId === 'tutorial_island');
+      const firstTutorialChallenge = tutorialChallenges[0];
+      const lastTutorialChallenge = tutorialChallenges[tutorialChallenges.length - 1];
+
+      if (firstTutorialChallenge && challengeId === firstTutorialChallenge.id) {
         nextUnlocks.seaChart = true;
       }
 
-      if (challengeId === 'chal_06') {
+      if (lastTutorialChallenge && challengeId === lastTutorialChallenge.id) {
         nextUnlocks.ship = true;
         nextFleet.activeShipId = 'sloop_abandoned';
         if (!nextFleet.ownedShipIds.includes('sloop_abandoned')) {
@@ -153,8 +157,8 @@ export function useChallengeProgress() {
           sloop_abandoned: {
             name: 'The Weathered Sloop',
             stats: { speed: 1.0, capacity: 10 },
-            cosmetics: { activeSkin: 'default' }
-          }
+            cosmetics: { activeSkin: 'default' },
+          },
         };
       }
 
@@ -233,5 +237,22 @@ export function useChallengeProgress() {
     }));
   }, []);
 
-  return { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress };
+  const resumeChallenge = useCallback((challengeId: string) => {
+    setProgress((prev) => {
+      const nextUnlocked = [...prev.unlockedIds];
+      if (!nextUnlocked.includes(challengeId)) {
+        nextUnlocked.push(challengeId);
+      }
+      const meta = ContentService.getChallenge(challengeId);
+      return {
+        ...prev,
+        currentChallengeId: challengeId,
+        currentIsland: meta?.islandId || prev.currentIsland,
+        currentNPC: meta?.npcId || prev.currentNPC,
+        unlockedIds: nextUnlocked,
+      };
+    });
+  }, []);
+
+  return { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress, resumeChallenge };
 }
