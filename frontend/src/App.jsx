@@ -12,12 +12,15 @@ import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { apiClient } from './services/api';
 import { ContentService } from './services/ContentService';
+import { AnimatePresence } from 'framer-motion';
+import DatabaseModal from './components/database/DatabaseModal';
 
 export default function App() {
   const { user, loading, logout } = useAuth();
   const { progress, completeChallenge, selectChallenge, updateUnlock, renameShip, adjustCoins, devApplyState, setServerProgress, resumeChallenge } = useChallengeProgress();
   const [playerProfile, setPlayerProfile] = useState(() => PlayerProfileService.loadProfile());
   const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isDatabaseOpen, setIsDatabaseOpen] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [hasSynced, setHasSynced] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
@@ -103,6 +106,7 @@ export default function App() {
         worldState={worldState}
         hasSeaChart={progress.unlocks?.seaChart || false}
         onMapOpen={() => setIsMapOpen(true)}
+        onDatabaseOpen={() => setIsDatabaseOpen(true)}
         onLogout={logout}
       >
         <GameStateManager 
@@ -120,6 +124,11 @@ export default function App() {
           adjustCoins={adjustCoins}
           devApplyState={devApplyState}
         />
+        <AnimatePresence>
+          {isDatabaseOpen && (
+            <DatabaseModal onClose={() => setIsDatabaseOpen(false)} />
+          )}
+        </AnimatePresence>
       </MainGameLayout>
     </InventoryProvider>
   );

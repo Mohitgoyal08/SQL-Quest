@@ -11,6 +11,7 @@ export default function HUD({
   currentNPC = 'Captain Blackbeard',
   hasSeaChart = false,
   onMapOpen,
+  onDatabaseOpen,
   onLogout,
   activeShipName = null
 }) {
@@ -48,6 +49,14 @@ export default function HUD({
             }`}
           >
             🗺️ Map
+          </button>
+          <button 
+            type="button" 
+            title="Open Database Browser" 
+            onClick={onDatabaseOpen}
+            className="px-3 py-1.5 bg-slate-800/80 border border-[#8c6b3e]/40 hover:border-amber-500 rounded-lg text-xs font-bold text-[#ebd9b4] hover:bg-slate-700/80 hover:-translate-y-0.5 transition-all shadow-md cursor-pointer"
+          >
+            🗃️ Database
           </button>
           <button 
             type="button" 
