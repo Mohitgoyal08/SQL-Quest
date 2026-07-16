@@ -36,7 +36,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
     AudioService.startOceanAmbience();
     
     // Sparkles initialization
-    const points = Array.from({ length: 15 }).map((_, i) => ({
+    const points = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       x: 10 + Math.random() * 80,
       y: 15 + Math.random() * 70,
@@ -167,14 +167,18 @@ export default function SeaWorld({ progress, onTravelTo }) {
     setCamera({ scale: 1, x: 0, y: 0 });
   };
 
+  const cartoonTextShadow = {
+    textShadow: '2px 2px 0px #1e293b, -1px -1px 0px #1e293b, 1px -1px 0px #1e293b, -1px 1px 0px #1e293b'
+  };
+
   return (
-    <div className="flex-1 relative bg-gradient-to-b from-[#0f2d4a] via-[#153e66] to-[#091b2e] overflow-hidden select-none w-full h-full">
+    <div className="flex-1 relative bg-gradient-to-b from-[#38bdf8] via-[#0ea5e9] to-[#059669] overflow-hidden select-none w-full h-full">
       
       {/* 3D Sun Rays Atmosphere */}
       <div 
-        className="absolute top-0 right-0 w-[60%] h-[70%] pointer-events-none opacity-20 z-10"
+        className="absolute top-0 right-0 w-[80%] h-[80%] pointer-events-none opacity-25 z-10"
         style={{
-          background: 'linear-gradient(135deg, rgba(253,230,138,0.4) 0%, transparent 70%)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 60%)',
           clipPath: 'polygon(100% 0, 0 0, 100% 100%)'
         }}
       />
@@ -184,7 +188,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
         <motion.div
           animate={{ x: [-200, window.innerWidth + 200] }}
           transition={{ repeat: Infinity, duration: 110, ease: "linear" }}
-          className="absolute text-7xl opacity-20 filter blur-[1px]"
+          className="absolute text-7xl opacity-30 filter blur-[1px]"
           style={{ top: '8%' }}
         >
           ☁️
@@ -192,7 +196,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
         <motion.div
           animate={{ x: [window.innerWidth + 200, -200] }}
           transition={{ repeat: Infinity, duration: 140, ease: "linear" }}
-          className="absolute text-[90px] opacity-15 filter blur-[2px]"
+          className="absolute text-[90px] opacity-25 filter blur-[2px]"
           style={{ top: '30%' }}
         >
           ☁️
@@ -200,7 +204,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
         <motion.div
           animate={{ x: [-250, window.innerWidth + 250] }}
           transition={{ repeat: Infinity, duration: 125, ease: "linear", delay: 15 }}
-          className="absolute text-[110px] opacity-10 filter blur-[3px]"
+          className="absolute text-[110px] opacity-20 filter blur-[3px]"
           style={{ top: '65%' }}
         >
           ☁️
@@ -212,9 +216,9 @@ export default function SeaWorld({ progress, onTravelTo }) {
         {sparkles.map((sp) => (
           <motion.span
             key={sp.id}
-            animate={{ opacity: [0, 0.7, 0] }}
+            animate={{ opacity: [0, 0.9, 0], scale: [0.8, 1.2, 0.8] }}
             transition={{ repeat: Infinity, duration: 4, delay: sp.delay, ease: "easeInOut" }}
-            className="absolute text-[10px] text-amber-100/50"
+            className="absolute text-[11px] text-yellow-100"
             style={{ left: `${sp.x}%`, top: `${sp.y}%` }}
           >
             ✨
@@ -228,7 +232,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
           <motion.div
             key={ambientEvent.id}
             initial={{ scale: 0, opacity: 0, y: 30 }}
-            animate={{ scale: [0, 1.1, 0.9, 0], opacity: [0, 0.9, 0.7, 0], y: [30, -5, 0, 20] }}
+            animate={{ scale: [0, 1.2, 1, 0], opacity: [0, 0.9, 0.8, 0], y: [30, -5, 0, 20] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 7, ease: "easeInOut" }}
             className="absolute text-5xl pointer-events-none z-10 select-none filter drop-shadow-lg"
@@ -274,10 +278,10 @@ export default function SeaWorld({ progress, onTravelTo }) {
           <motion.div
             key={ambientEvent.id}
             initial={{ x: -100, opacity: 0 }}
-            animate={{ x: window.innerWidth + 100, opacity: [0, 0.35, 0.35, 0] }}
+            animate={{ x: window.innerWidth + 100, opacity: [0, 0.45, 0.45, 0] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 26, ease: "linear" }}
-            className="absolute text-4xl pointer-events-none opacity-40 z-10 select-none grayscale"
+            className="absolute text-4xl pointer-events-none opacity-50 z-10 select-none grayscale"
             style={{ top: `${ambientEvent.y}%` }}
           >
             ⛵
@@ -287,7 +291,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
           <motion.div
             key={ambientEvent.id}
             initial={{ x: '-100%', opacity: 0 }}
-            animate={{ x: '100%', opacity: [0, 0.12, 0.12, 0] }}
+            animate={{ x: '100%', opacity: [0, 0.15, 0.15, 0] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 9, ease: "linear" }}
             className="absolute top-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none z-10 select-none"
@@ -320,7 +324,7 @@ export default function SeaWorld({ progress, onTravelTo }) {
       >
         
         {/* Wave Layers */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-25 overflow-hidden">
           <motion.div
             animate={{ x: [-150, 150] }}
             transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
@@ -342,12 +346,12 @@ export default function SeaWorld({ progress, onTravelTo }) {
         </div>
 
         {/* Dotted Voyage Route Line */}
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }}>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.35))' }}>
           <path 
             d="M 15 70 Q 20 50 25 45 Q 30 40 40 35 Q 45 40 50 55 Q 60 55 65 40 Q 70 30 75 25 Q 80 40 80 65 Q 85 65 90 30" 
             fill="none" 
-            stroke="rgba(251, 191, 36, 0.35)" 
-            strokeWidth="1.2" 
+            stroke="rgba(251, 191, 36, 0.5)" 
+            strokeWidth="1.5" 
             strokeDasharray="4 4" 
             strokeLinecap="round"
           />
@@ -369,8 +373,8 @@ export default function SeaWorld({ progress, onTravelTo }) {
             className="absolute w-12 h-12 z-30 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center"
           >
             {/* Water ripples under ship */}
-            <span className="absolute w-16 h-16 bg-white/20 rounded-full animate-ping opacity-60 pointer-events-none" />
-            <span className="absolute w-12 h-12 bg-white/30 rounded-full animate-pulse opacity-45 pointer-events-none" style={{ animationDuration: '1.5s' }} />
+            <span className="absolute w-16 h-16 bg-white/30 rounded-full animate-ping opacity-60 pointer-events-none" />
+            <span className="absolute w-12 h-12 bg-white/40 rounded-full animate-pulse opacity-45 pointer-events-none" style={{ animationDuration: '1.5s' }} />
             
             {/* Ship shadow */}
             <div className="absolute w-10 h-6 bg-black/40 rounded-full blur-[3px] translate-y-6 rotate-[15deg] pointer-events-none" />
@@ -421,10 +425,10 @@ export default function SeaWorld({ progress, onTravelTo }) {
               {/* Island Button Outer */}
               <div 
                 className={`
-                  relative flex items-center justify-center rounded-full
-                  w-16 h-16 md:w-24 md:h-24 text-3xl md:text-5xl shadow-2xl transition-all duration-300
-                  ${isUnlocked ? 'hover:scale-110 active:scale-95 shadow-amber-500/10 hover:shadow-amber-500/25 hover:border-amber-400 border border-transparent' : 'opacity-50 grayscale'}
-                  ${isCurrentLocation ? 'ring-4 ring-emerald-400 bg-emerald-600/80 backdrop-blur-sm' : (isUnlocked ? 'bg-amber-900/60 backdrop-blur-sm ring-2 ring-amber-400/70' : 'bg-slate-900/80 backdrop-blur-sm')}
+                  relative flex items-center justify-center rounded-3xl
+                  w-16 h-16 md:w-20 md:h-20 text-3xl md:text-4xl shadow-xl transition-all duration-200
+                  ${isUnlocked ? 'hover:scale-105 active:scale-95 border-4 border-[#78350f] hover:border-yellow-900' : 'opacity-50 grayscale border-4 border-slate-700'}
+                  ${isCurrentLocation ? 'bg-gradient-to-b from-[#a7f3d0] to-[#059669] shadow-[0_6px_0_#022c22,0_12px_15px_rgba(0,0,0,0.3)]' : (isUnlocked ? 'bg-gradient-to-b from-[#fef08a] to-[#f59e0b] shadow-[0_6px_0_#451a03,0_12px_15px_rgba(0,0,0,0.3)]' : 'bg-gradient-to-b from-[#94a3b8] to-[#475569] shadow-[0_6px_0_#0f172a,0_12px_15px_rgba(0,0,0,0.3)]')}
                 `}
               >
                 {/* Island graphic character */}
@@ -432,12 +436,12 @@ export default function SeaWorld({ progress, onTravelTo }) {
                 
                 {/* Unlocked Island Foam Wave Border */}
                 {isUnlocked && (
-                  <span className="absolute -inset-1 rounded-full border border-white/10 animate-pulse pointer-events-none" style={{ animationDuration: '3s' }} />
+                  <span className="absolute -inset-1.5 rounded-3xl border-2 border-white/20 animate-pulse pointer-events-none" style={{ animationDuration: '3.5s' }} />
                 )}
 
                 {/* Locked Padlock with chained crossing visual */}
                 {!isUnlocked && (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-950/70 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.2)] animate-pulse">
+                  <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-slate-950/70 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.2)] animate-pulse">
                     <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full text-slate-500 opacity-60">
                       <path d="M 15,15 L 85,85 M 85,15 L 15,85" stroke="currentColor" strokeWidth="4" strokeDasharray="3 3" strokeLinecap="round" />
                     </svg>
@@ -447,7 +451,10 @@ export default function SeaWorld({ progress, onTravelTo }) {
               </div>
 
               {/* Island labels typography */}
-              <span className={`mt-3 font-bold text-xs md:text-sm text-center tracking-wide filter drop-shadow-md select-none ${isUnlocked ? 'text-[#ebd9b4] font-extrabold' : 'text-slate-400 font-medium'}`}>
+              <span 
+                className={`mt-4 font-black text-xs md:text-sm text-center tracking-wide select-none ${isUnlocked ? 'text-[#ebd9b4] font-black' : 'text-slate-400 font-medium'}`}
+                style={isUnlocked ? cartoonTextShadow : {}}
+              >
                 {island.name}
               </span>
 
@@ -459,7 +466,10 @@ export default function SeaWorld({ progress, onTravelTo }) {
                   const completed = islandChallenges.filter(c => progress.completedIds.includes(c.id)).length;
                   const pct = Math.round((completed / total) * 100);
                   return (
-                    <span className="block text-[10px] font-bold text-amber-500/90 drop-shadow mt-0.5 select-none font-mono">
+                    <span 
+                      className="block text-[10px] font-black text-amber-300 drop-shadow select-none font-sans"
+                      style={cartoonTextShadow}
+                    >
                       {completed}/{total} ({pct}%)
                     </span>
                   );
@@ -471,23 +481,23 @@ export default function SeaWorld({ progress, onTravelTo }) {
         })}
       </motion.div>
 
-      {/* Travel Overlay / Confirmation Banner */}
+      {/* Travel Overlay / Confirmation Banner (Wooden board style) */}
       {activeVoyageDest && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#0b131e]/90 backdrop-blur-md border border-amber-500/30 rounded-xl p-4 flex flex-col items-center gap-3 shadow-2xl z-40 max-w-sm w-[90%] text-center">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gradient-to-b from-[#78350f] to-[#451a03] border-4 border-[#f59e0b] rounded-2xl p-5 flex flex-col items-center gap-3 shadow-[0_10px_0_#291305,0_20px_25px_rgba(0,0,0,0.4)] z-40 max-w-sm w-[90%] text-center">
           <div>
-            <h4 className="text-[10px] text-amber-500 font-bold uppercase tracking-widest font-mono">Set Voyage</h4>
-            <p className="text-sm font-bold text-white mt-1">Sail to {activeVoyageDest.name}?</p>
+            <h4 className="text-[10px] text-amber-300 font-extrabold uppercase tracking-widest font-mono" style={{ textShadow: '1.5px 1.5px 0px #000' }}>Set Voyage</h4>
+            <p className="text-sm font-black text-white mt-1" style={{ textShadow: '2px 2px 0px #000' }}>Sail to {activeVoyageDest.name}?</p>
           </div>
           <div className="flex gap-3 w-full">
             <button
               onClick={cancelVoyage}
-              className="flex-1 py-1.5 bg-slate-800 border border-slate-700 hover:border-slate-500 text-xs text-slate-300 font-bold rounded-lg transition-all cursor-pointer"
+              className="flex-1 py-2 bg-[#1e293b] border-2 border-slate-700 text-xs text-slate-300 font-black rounded-xl hover:border-slate-500 transition-all cursor-pointer shadow-[0_4px_0_#0f172a]"
             >
               Stay Here
             </button>
             <button
               onClick={executeVoyage}
-              className="flex-1 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-xs text-slate-950 font-extrabold rounded-lg shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+              className="flex-1 py-2 bg-gradient-to-b from-[#fbbf24] to-[#d97706] text-xs text-slate-950 font-black rounded-xl hover:from-[#fcd34d] hover:to-[#ea580c] transition-all cursor-pointer shadow-[0_4px_0_#78350f] border-2 border-[#fef08a]"
             >
               Set Sail ⛵
             </button>
