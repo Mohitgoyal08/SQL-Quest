@@ -57,6 +57,33 @@ async def lifespan(app: FastAPI):
             # Execute migration upgrade head command
             command.upgrade(alembic_cfg, "head")
             logger.info("Database migrations successfully executed.")
+            
+            # Auto-seed default admin user if no admin exists
+            from app.db.session import SessionLocal
+            from app.crud.crud_user import get_user_by_email, create_user
+            from app.schemas.user import UserCreate
+            from app.models.user import UserRole
+            
+            db = SessionLocal()
+            try:
+                admin_user = get_user_by_email(db, email="admin@sqlquest.com")
+                if not admin_user:
+                    logger.info("Seeding default admin user...")
+                    admin_in = UserCreate(
+                        email="admin@sqlquest.com",
+                        password="AdminPassword123!",
+                        display_name="Admin",
+                        role=UserRole.ADMIN
+                    )
+                    create_user(db=db, obj_in=admin_in)
+                    logger.info("Default admin user successfully seeded.")
+                else:
+                    logger.info("Admin user already exists. Skipping admin seed.")
+            except Exception as seed_err:
+                logger.warning(f"Could not auto-seed admin user: {seed_err}")
+            finally:
+                db.close()
+                
         except Exception as e:
             logger.error(f"Fatal migration error on startup: {e}", exc_info=True)
             # Raise exception to prevent FastAPI from starting up with inconsistent database state
