@@ -12,11 +12,36 @@ logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Run Alembic migrations on startup in production or if postgres is detected
-    is_postgres = settings.DATABASE_URL.startswith("postgresql") or settings.DATABASE_URL.startswith("postgres")
+    db_url = settings.DATABASE_URL or ""
+    is_postgres = db_url.startswith("postgresql") or db_url.startswith("postgres")
+    
+    logger.info(f"FastAPI Lifespan Startup: ENV={settings.ENV}, is_postgres={is_postgres}, database_url_configured={bool(db_url)}")
+    
     if settings.ENV == "production" or is_postgres:
-        logger.info("Production mode or remote PostgreSQL detected. Starting database migrations...")
+        logger.info("Production mode or remote PostgreSQL detected. Checking database migrations...")
         try:
+            from sqlalchemy import inspect, text
+            from app.db.session import engine
+            
+            # Normalize db_url internally for schema inspection
+            normalized_url = db_url
+            if normalized_url.startswith("postgres://"):
+                normalized_url = normalized_url.replace("postgres://", "postgresql://", 1)
+                
+            # Perform self-healing check if alembic_version exists but core user table is missing
+            try:
+                inspector = inspect(engine)
+                existing_tables = inspector.get_table_names()
+                logger.info(f"Existing database tables: {existing_tables}")
+                
+                if "alembic_version" in existing_tables and "users" not in existing_tables:
+                    logger.warning("Corrupt migration state detected: 'alembic_version' table exists but 'users' is missing. Resetting migration version...")
+                    with engine.begin() as conn:
+                        conn.execute(text("DROP TABLE alembic_version;"))
+                    logger.info("Successfully dropped corrupt 'alembic_version' table.")
+            except Exception as schema_err:
+                logger.warning(f"Could not perform schema check (database might be completely empty): {schema_err}")
+
             # Resolve alembic.ini path relative to project structure
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             alembic_ini_path = os.path.join(base_dir, "alembic.ini")
@@ -27,7 +52,7 @@ async def lifespan(app: FastAPI):
                 
             logger.info(f"Using Alembic configuration file at: {alembic_ini_path}")
             alembic_cfg = Config(alembic_ini_path)
-            alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+            alembic_cfg.set_main_option("sqlalchemy.url", normalized_url)
             
             # Execute migration upgrade head command
             command.upgrade(alembic_cfg, "head")
