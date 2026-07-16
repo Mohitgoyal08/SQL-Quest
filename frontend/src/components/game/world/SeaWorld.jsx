@@ -4,6 +4,54 @@ import { WorldManager } from '../../../systems/WorldManager';
 import { AudioService } from '../../../services/AudioService';
 import { QuestManager } from '../../../systems/QuestManager';
 
+const PirateShipSVG = () => (
+  <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg select-none">
+    {/* Main Mast */}
+    <rect x="47" y="15" width="5" height="52" fill="#451a03" rx="1.5" />
+    
+    {/* Red/White Striped Sails */}
+    {/* Sail 1 (Upper) */}
+    <path d="M 28,18 C 36,16 60,16 68,18 C 64,32 58,32 28,32 Z" fill="#dc2626" />
+    <path d="M 36,17.5 C 40,22 40,28 36,31.5" fill="#ffffff" />
+    <path d="M 52,17.5 C 56,22 56,28 52,31.5" fill="#ffffff" />
+    
+    {/* Sail 2 (Lower/Larger) */}
+    <path d="M 18,34 C 32,31 66,31 80,34 C 75,51 68,51 18,51 Z" fill="#dc2626" />
+    <path d="M 28,33.5 C 33,40 33,47 28,50.5" fill="#ffffff" />
+    <path d="M 48,33.5 C 53,40 53,47 48,50.5" fill="#ffffff" />
+    <path d="M 68,33.5 C 73,40 73,47 68,50.5" fill="#ffffff" />
+
+    {/* Pirate Flag */}
+    <path d="M 48,7 L 32,11 L 48,15 Z" fill="#0f172a" />
+    <circle cx="41" cy="11" r="2.2" fill="#ffffff" />
+    <line x1="38" y1="9.5" x2="44" y2="12.5" stroke="#ffffff" strokeWidth="0.8" />
+    <line x1="44" y1="9.5" x2="38" y2="12.5" stroke="#ffffff" strokeWidth="0.8" />
+
+    {/* Bowsprit (Front pole) */}
+    <polygon points="76,60 90,56 76,54" fill="#854d0e" />
+
+    {/* Wooden Hull (Body) */}
+    <path d="M 14,50 C 24,50 76,50 86,46 C 82,64 72,67 19,67 Z" fill="#78350f" stroke="#451a03" strokeWidth="2" />
+    
+    {/* Gold trim along hull */}
+    <path d="M 14,50 C 24,50 76,50 86,46" stroke="#fbbf24" strokeWidth="2.5" fill="none" />
+    
+    {/* Gunports / Cannons */}
+    <circle cx="31" cy="58" r="3.2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
+    <circle cx="47" cy="58" r="3.2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
+    <circle cx="63" cy="58" r="3.2" fill="#1e293b" stroke="#f59e0b" strokeWidth="1" />
+
+    {/* Cabin (Back deck structure) */}
+    <rect x="16" y="40" width="18" height="11" fill="#451a03" rx="1.5" />
+    <rect x="19" y="43" width="4.5" height="5.5" fill="#fef08a" rx="1" />
+    <rect x="26" y="43" width="4.5" height="5.5" fill="#fef08a" rx="1" />
+
+    {/* Glowing Stern Lantern */}
+    <circle cx="12" cy="38" r="2.8" fill="#fbbf24" className="animate-pulse" />
+    <path d="M 12,38 L 16,41" stroke="#fbbf24" strokeWidth="0.8" />
+  </svg>
+);
+
 // Use same percentages as WorldReveal for consistency
 const ISLANDS_MANIFEST = [
   { id: 'tutorial_island', name: 'Tutorial Harbor', top: '70%', left: '15%', glowing: true, icon: '⚓' },
@@ -370,19 +418,19 @@ export default function SeaWorld({ progress, onTravelTo }) {
               left: { duration: 3, ease: "easeInOut" },
               rotate: { duration: 0.4 }
             }}
-            className="absolute w-12 h-12 z-30 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center"
+            className="absolute w-16 h-16 z-30 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center"
           >
             {/* Water ripples under ship */}
-            <span className="absolute w-16 h-16 bg-white/30 rounded-full animate-ping opacity-60 pointer-events-none" />
-            <span className="absolute w-12 h-12 bg-white/40 rounded-full animate-pulse opacity-45 pointer-events-none" style={{ animationDuration: '1.5s' }} />
+            <span className="absolute w-20 h-20 bg-white/30 rounded-full animate-ping opacity-60 pointer-events-none" />
+            <span className="absolute w-16 h-16 bg-white/40 rounded-full animate-pulse opacity-45 pointer-events-none" style={{ animationDuration: '1.5s' }} />
             
             {/* Ship shadow */}
-            <div className="absolute w-10 h-6 bg-black/40 rounded-full blur-[3px] translate-y-6 rotate-[15deg] pointer-events-none" />
+            <div className="absolute w-14 h-8 bg-black/45 rounded-full blur-[4px] translate-y-8 rotate-[15deg] pointer-events-none" />
             
-            {/* Ship Emoji / Icon */}
-            <span className="text-4xl filter drop-shadow-md select-none transform hover:scale-110 transition-transform">
-              ⛵
-            </span>
+            {/* Custom SVG Pirate Ship */}
+            <div className="w-16 h-16 pointer-events-none transform hover:scale-110 transition-transform">
+              <PirateShipSVG />
+            </div>
 
             {/* Bubble Wake Trail */}
             {shipState.isSailing && (
