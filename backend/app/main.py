@@ -66,6 +66,27 @@ async def lifespan(app: FastAPI):
             
             db = SessionLocal()
             try:
+                # Seed all 8 standard islands required by foreign key constraints in challenges
+                from app.models.content import Island
+                islands = [
+                    {"id": "tutorial_island", "name": "Tutorial Harbor", "description": "The starting harbor.", "order_index": 0},
+                    {"id": "merchant_hub", "name": "Merchant Isles", "description": "A bustling trade hub.", "order_index": 1},
+                    {"id": "smugglers_cove", "name": "Smuggler's Cove", "description": "A hidden cove for smugglers.", "order_index": 2},
+                    {"id": "jungle", "name": "Jungle of Queries", "description": "A dense jungle full of mysteries.", "order_index": 3},
+                    {"id": "crystal_caverns", "name": "Crystal Caverns", "description": "Glowing underground caverns.", "order_index": 4},
+                    {"id": "volcano", "name": "Volcano Island", "description": "A fiery, dangerous landscape.", "order_index": 5},
+                    {"id": "lost_sea", "name": "Lost Sea", "description": "Uncharted and dangerous waters.", "order_index": 6},
+                    {"id": "pirate_ship", "name": "Pirate King's Ship", "description": "The final showdown.", "order_index": 7},
+                ]
+                
+                for island_data in islands:
+                    island_record = db.query(Island).filter(Island.id == island_data["id"]).first()
+                    if not island_record:
+                        logger.info(f"Seeding island: {island_data['id']}")
+                        db.add(Island(**island_data))
+                db.commit()
+                logger.info("Islands verification and seeding complete.")
+
                 admin_user = get_user_by_email(db, email="admin@sqlquest.com")
                 if not admin_user:
                     logger.info("Seeding default admin user...")
