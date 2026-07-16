@@ -60,25 +60,43 @@ async def lifespan(app: FastAPI):
             
             # Auto-seed default admin user if no admin exists
             from app.db.session import SessionLocal
-            from app.crud.crud_user import get_user_by_email, create_user
-            from app.schemas.user import UserCreate
-            from app.models.user import UserRole
+            from app.crud.crud_user import get_user_by_email
+            from app.models.user import User, PlayerProfile, UserRole
+            from app.core.security import get_password_hash
             
             db = SessionLocal()
             try:
                 admin_user = get_user_by_email(db, email="admin@sqlquest.com")
                 if not admin_user:
                     logger.info("Seeding default admin user...")
-                    admin_in = UserCreate(
+                    hashed_pwd = get_password_hash("AdminPassword123!")
+                    
+                    admin_db = User(
                         email="admin@sqlquest.com",
-                        password="AdminPassword123!",
-                        display_name="Admin",
+                        hashed_password=hashed_pwd,
                         role=UserRole.ADMIN
                     )
-                    create_user(db=db, obj_in=admin_in)
+                    db.add(admin_db)
+                    db.commit()
+                    db.refresh(admin_db)
+                    
+                    profile_db = PlayerProfile(
+                        user_id=admin_db.id,
+                        display_name="Admin",
+                        avatar_id="pirate-boy"
+                    )
+                    db.add(profile_db)
+                    db.commit()
                     logger.info("Default admin user successfully seeded.")
                 else:
-                    logger.info("Admin user already exists. Skipping admin seed.")
+                    # Let's ensure if it exists, it has the ADMIN role
+                    if admin_user.role != UserRole.ADMIN:
+                        logger.info("Updating existing admin user role to ADMIN...")
+                        admin_user.role = UserRole.ADMIN
+                        db.add(admin_user)
+                        db.commit()
+                        logger.info("Updated role to ADMIN.")
+                    logger.info("Admin user check complete.")
             except Exception as seed_err:
                 logger.warning(f"Could not auto-seed admin user: {seed_err}")
             finally:
