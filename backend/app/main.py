@@ -12,9 +12,10 @@ logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Run Alembic migrations on startup in production
-    if settings.ENV == "production":
-        logger.info("Production mode detected. Starting database migrations...")
+    # Run Alembic migrations on startup in production or if postgres is detected
+    is_postgres = settings.DATABASE_URL.startswith("postgresql") or settings.DATABASE_URL.startswith("postgres")
+    if settings.ENV == "production" or is_postgres:
+        logger.info("Production mode or remote PostgreSQL detected. Starting database migrations...")
         try:
             # Resolve alembic.ini path relative to project structure
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
