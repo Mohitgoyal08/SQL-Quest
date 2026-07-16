@@ -159,21 +159,3 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 @app.get("/")
 def read_root():
     return {"message": "SQL Quest V2 Backend is running"}
-
-@app.get("/api/v1/debug-counts")
-def debug_counts():
-    from app.db.session import SessionLocal
-    from sqlalchemy import text
-    db = SessionLocal()
-    try:
-        tables = ["users", "player_profiles", "islands", "challenges", "rewards", "dialogues"]
-        counts = {}
-        for table in tables:
-            res = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
-            counts[table] = res
-        # Check islands
-        islands = db.execute(text("SELECT id, name FROM islands")).fetchall()
-        counts["islands_list"] = [dict(row._mapping) for row in islands]
-        return counts
-    finally:
-        db.close()
